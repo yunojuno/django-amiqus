@@ -7,54 +7,48 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 
-from onfido.helpers import create_applicant, create_check
-from onfido.models import Event, Report
-from onfido.models.base import BaseStatusModel
+from amiqus.helpers import create_client, create_record
+from amiqus.models import Check, Event
+from amiqus.models.base import BaseStatusModel
 
-from .conftest import (
-    TEST_APPLICANT,
-    TEST_CHECK,
-    TEST_EVENT,
-    TEST_REPORT_IDENTITY_ENHANCED,
-)
+from .conftest import TEST_CHECK, TEST_CLIENT, TEST_EVENT, TEST_REPORT_IDENTITY_ENHANCED
 
 User = get_user_model()
 
 
-@mock.patch("onfido.helpers.post")
-@mock.patch("onfido.helpers.get")
-@mock.patch("onfido.models.base.get")
+@mock.patch("amiqus.helpers.post")
+@mock.patch("amiqus.helpers.get")
+@mock.patch("amiqus.models.base.get")
 @pytest.mark.django_db
 def test_end_to_end(mock_fetch, mock_get, mock_post, user, client: Client):
+    # Create a new client from the default user -
+    # the API POST returns the TEST_CLIENT JSON
+    mock_post.return_value = deepcopy(TEST_CLIENT)
+    client = create_client(user)
 
-    # Create a new applicant from the default user -
-    # the API POST returns the TEST_APPLICANT JSON
-    mock_post.return_value = deepcopy(TEST_APPLICANT)
-    applicant = create_applicant(user)
-
-    # Create a new check for the applicant just created
-    # the API POST returns the new check (TEST_CHECK)
-    # the API GET retrievs the reports for the check (TEST_REPORT_IDENTITY_ENHANCED)
+    # Create a new record for the client just created
+    # the API POST returns the new record (TEST_CHECK)
+    # the API GET retrievs the checks for the record (TEST_REPORT_IDENTITY_ENHANCED)
     mock_post.return_value = TEST_CHECK
-    mock_get.return_value = dict(reports=[TEST_REPORT_IDENTITY_ENHANCED])
-    check = create_check(applicant, report_names=[Report.ReportType.IDENTITY_ENHANCED])
-    assert not check.is_clear
-    assert check.status == "in_progress"
+    mock_get.return_value = dict(checks=[TEST_REPORT_IDENTITY_ENHANCED])
+    record = create_record(client, check_names=[Check.CheckType.IDENTITY_ENHANCED])
+    assert not record.is_clear
+    assert record.status == "in_progress"
 
-    # this simulates a check.fetch() using the default JSON updated
+    # this simulates a record.fetch() using the default JSON updated
     # with the contents from the event - we are forcing the result here
-    # so that the check comes back from the fetch() as "complete" and "clear"
-    check.refresh_from_db()
-    mock_fetch.return_value = check.raw
+    # so that the record comes back from the fetch() as "complete" and "clear"
+    record.refresh_from_db()
+    mock_fetch.return_value = record.raw
     mock_fetch.return_value["status"] = BaseStatusModel.Status.COMPLETE
     mock_fetch.return_value["result"] = BaseStatusModel.Result.CLEAR
 
     # Call the status_update webhook with the TEST_EVENT payload
-    url = reverse("onfido:status_update")
-    with mock.patch("onfido.decorators.TEST_MODE", True):
+    url = reverse("amiqus:status_update")
+    with mock.patch("amiqus.decorators.TEST_MODE", True):
         client.post(url, data=TEST_EVENT, content_type="application/json")
     assert mock_fetch.call_count == 1
     assert Event.objects.count() == 1
-    check.refresh_from_db()
-    assert check.is_clear
-    assert check.status == BaseStatusModel.Status.COMPLETE
+    record.refresh_from_db()
+    assert record.is_clear
+    assert record.status == BaseStatusModel.Status.COMPLETE

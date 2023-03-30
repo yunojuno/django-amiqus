@@ -4,50 +4,50 @@ from unittest import mock
 import pytest
 from dateutil.parser import parse as date_parse
 
-from onfido.models import Report
-from onfido.models.base import BaseModel
+from amiqus.models import Check
+from amiqus.models.base import BaseModel
 
 from ..conftest import IDENTITY_REPORT_ID, TEST_REPORT_IDENTITY_ENHANCED
 
 
 @pytest.mark.django_db
-class TestReportManager:
+class TestCheckManager:
     @mock.patch.object(BaseModel, "full_clean")
-    def test_create_report(self, mock_clean, user, check):
+    def test_create_check(self, mock_clean, user, record):
         """Test the create method parses response."""
         data = copy.deepcopy(TEST_REPORT_IDENTITY_ENHANCED)
-        report = Report.objects.create_report(check=check, raw=data)
-        assert report.user == user
-        assert report.onfido_check == check
-        assert report.onfido_id == data["id"]
-        assert report.report_type == data["name"]
-        assert report.status == data["status"]
-        assert report.result == data["result"]
-        assert report.created_at == date_parse(data["created_at"])
+        check = Check.objects.create_check(record=record, raw=data)
+        assert check.user == user
+        assert check.amiqus_record == record
+        assert check.amiqus_id == data["id"]
+        assert check.check_type == data["name"]
+        assert check.status == data["status"]
+        assert check.result == data["result"]
+        assert check.created_at == date_parse(data["created_at"])
 
 
 @pytest.mark.django_db
-class TestReportModel:
-    def test_defaults(self, check):
+class TestCheckModel:
+    def test_defaults(self, record):
         """Test default property values."""
-        report = Report(onfido_check=check, onfido_id="foo", report_type="document")
-        assert report.onfido_id == "foo"
-        assert report.created_at is None
-        assert report.status is None
-        assert report.result is None
-        assert report.report_type == "document"
+        check = Check(amiqus_record=record, amiqus_id="foo", check_type="document")
+        assert check.amiqus_id == "foo"
+        assert check.created_at is None
+        assert check.status is None
+        assert check.result is None
+        assert check.check_type == "document"
 
     def test_parse(self):
         """Test the parse_raw method."""
         data = copy.deepcopy(TEST_REPORT_IDENTITY_ENHANCED)
         assert "breakdown" in data
         assert "properties" in data
-        report = Report().parse(data)
-        # the default report scrubber should have removed data:
-        assert "breakdown" not in report.raw
-        assert "properties" not in report.raw
-        assert report.onfido_id == IDENTITY_REPORT_ID
-        assert report.created_at == date_parse(data["created_at"])
-        assert report.status == TEST_REPORT_IDENTITY_ENHANCED["status"]
-        assert report.result == TEST_REPORT_IDENTITY_ENHANCED["result"]
-        assert report.report_type == TEST_REPORT_IDENTITY_ENHANCED["name"]
+        check = Check().parse(data)
+        # the default check scrubber should have removed data:
+        assert "breakdown" not in check.raw
+        assert "properties" not in check.raw
+        assert check.amiqus_id == IDENTITY_REPORT_ID
+        assert check.created_at == date_parse(data["created_at"])
+        assert check.status == TEST_REPORT_IDENTITY_ENHANCED["status"]
+        assert check.result == TEST_REPORT_IDENTITY_ENHANCED["result"]
+        assert check.check_type == TEST_REPORT_IDENTITY_ENHANCED["name"]

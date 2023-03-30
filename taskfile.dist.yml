@@ -1,0 +1,131 @@
+# Taskfile, designed to:
+#
+# * Centralise regularly used project commands
+# * Help with verbose/long/awkward to use commands
+# * Ensure knowledge is shared, rather than cooped up in shell profiles
+#
+# See taskfile.dev for docs.
+version: "3"
+
+# Formatting rules:
+#
+#   * Alphabetical order.
+#   * Hyphens only in task names, no underscores.
+#   * Hyphenate multiple words.
+#   * Ensure each task is doc'd.
+#
+# Keep all tasks as verb-noun (as opposed to noun-verb) where it
+# makes sense please as this keeps similar actions across the
+# env close together in the task doc list. Noun-alone is fine!
+tasks:
+  clear-pyc:
+    desc: Clear all compiled Python files
+    cmds:
+      - find . -name "*.pyc" -exec rm -rf {} \;
+
+  default:
+    cmds:
+      - task --list
+
+  diff-python-deps:
+    desc: Tabularise the diff between Python dependencies on this branch vs master
+    cmds:
+      - git diff master poetry.lock | poetry run python scripts/parse_poetry_lock_diff.py --stdin
+
+  disable-precommit-hook:
+    desc:
+      Disables a given pre-commit hook locally. e.g disable-precommit-hook -- djhtml
+      reset-precommit-hooks can be used to restore all disabled hooks.
+    cmds:
+      - grep -q SKIP= .env.local && sed -i -E 's/^SKIP=(.*?)/SKIP=\1,{{.CLI_ARGS}}/' .env.local ||
+        printf "\nSKIP={{.CLI_ARGS}}" >> .env.local
+      - task reload-env
+
+  fix-file:
+    desc: Fix a specific file with pre-commit
+    cmds:
+      - pre-commit run --file {{.CLI_ARGS}}
+
+  install-env:
+    desc: Install the Python dependencies via Poetry
+    cmds:
+      - poetry install
+      - sha1sum ./poetry.lock > ./.venv/poetry.lock.sha1
+      - task: reload-env
+
+  make-migrations:
+    desc: Create new Django migrations files
+    cmds:
+      - poetry run python manage.py makemigrations {{.CLI_ARGS}}
+
+  makemigrations:
+    desc: Alias for make-migrations task
+    cmds:
+      - task: make-migrations
+
+  manage:
+    desc: Alias for manage-py task
+    cmds:
+      - task: manage-py
+
+  manage-py:
+    desc: Run any Django management command
+    interactive: true
+    cmds:
+      - poetry run python manage.py {{or .CLI_ARGS "help"}}
+
+  migrate:
+    desc: Apply unapplied Django migrations to PostgreSQL
+    cmds:
+      - poetry run python manage.py migrate {{.CLI_ARGS}}
+
+  mypy:
+    desc: Run our Python type hint checker against a file or the codebase
+    cmds:
+      - poetry run mypy {{or .CLI_ARGS "."}}
+
+  pytest:
+    desc: Run the pytest test suite
+    interactive: true
+    cmds:
+      - poetry run pytest -s {{or .CLI_ARGS "tests/"}}
+
+  pytest-rerun:
+    desc: Rerun failing pytest tests extracted from test-rerun-local.txt
+    interactive: true
+    cmds:
+      - poetry run pytest -s $(cat {{or .CLI_ARGS "test-rerun-local.txt"}})
+
+  reinstall-python-env:
+    desc: Remove the existing Python deps install & re-install it
+    cmds:
+      - task: remove-python-env
+      - task: install-python-env
+
+  reload-env:
+    desc: Reload the nix-shell environment
+    cmds:
+      - direnv reload
+
+  remove-python-env:
+    desc: Remove the Poetry virtualenv folder
+    cmds:
+      # Removing the entire venv will also deliberately
+      # remove the poetry.lock.sha1 file within.
+      - rm -rf ./.venv
+
+  reset-precommit-hooks:
+    desc: Re-enables all disabled pre-commit hooks
+    cmds:
+      - sed -i '/^SKIP=.*/d' .env.local
+      - task reload-env
+
+  runserver:
+    desc: Run django dev server
+    cmds:
+      - task: start-django
+
+  up:
+    desc: Start the Django development server (runserver)
+    cmds:
+      - poetry run python manage.py runserver {{.CLI_ARGS}}

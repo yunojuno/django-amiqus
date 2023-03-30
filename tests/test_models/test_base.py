@@ -6,15 +6,13 @@ from dateutil.parser import parse as date_parse
 from django.contrib.auth import get_user_model
 from django.db.models import Model, query
 from django.test import TestCase
-from django.test.utils import override_settings
 
-from onfido.api import ApiError
-from onfido.models import Applicant, Check, Event
-from onfido.models.base import BaseModel, BaseStatusModel
+from amiqus.api import ApiError
+from amiqus.models import Client, Event, Record
+from amiqus.models.base import BaseModel, BaseStatusModel
 
 
 class BaseModelInstance(BaseModel):
-
     base_href = "test_models"
 
     class Meta:
@@ -29,12 +27,12 @@ class BaseStatusModelInstance(BaseStatusModel):
 
 
 class BaseModelTests(TestCase):
-    """onfido.models.BaseModel tests."""
+    """amiqus.models.BaseModel tests."""
 
     def test_defaults(self):
         obj = BaseModelInstance()
         self.assertEqual(obj.id, None)
-        self.assertEqual(obj.onfido_id, "")
+        self.assertEqual(obj.amiqus_id, "")
         self.assertEqual(obj.created_at, None)
         self.assertEqual(obj.raw, None)
 
@@ -47,7 +45,7 @@ class BaseModelTests(TestCase):
 
     def test_href(self):
         """Test the href property."""
-        obj = BaseModelInstance(onfido_id="123")
+        obj = BaseModelInstance(amiqus_id="123")
         self.assertEqual(obj.href, "test_models/123")
 
     def test_parse(self):
@@ -55,22 +53,22 @@ class BaseModelTests(TestCase):
         data = {
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_applicant",
+            "status": "awaiting_client",
             "type": "standard",
             "result": "clear",
         }
         obj = BaseModelInstance().parse(data)
-        self.assertEqual(obj.onfido_id, data["id"])
+        self.assertEqual(obj.amiqus_id, data["id"])
         self.assertEqual(obj.created_at, date_parse(data["created_at"]))
 
     @mock.patch.object(BaseModel, "save")
-    @mock.patch("onfido.models.base.get")
+    @mock.patch("amiqus.models.base.get")
     def test_fetch(self, mock_get, mock_save):
         """Test the fetch method calls the API."""
         data = {
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_applicant",
+            "status": "awaiting_client",
             "type": "standard",
             "result": "clear",
             "href": "/",
@@ -78,21 +76,21 @@ class BaseModelTests(TestCase):
         mock_get.return_value = data
         obj = BaseModelInstance(raw={"href": "/"})
         obj.fetch()
-        # check that it has update raw, but parsed the return value
+        # record that it has update raw, but parsed the return value
         self.assertEqual(obj.raw, data)
-        self.assertEqual(obj.onfido_id, data["id"])
+        self.assertEqual(obj.amiqus_id, data["id"])
         self.assertEqual(obj.created_at, date_parse(data["created_at"]))
-        # check that it has **not** called the save method
+        # record that it has **not** called the save method
         mock_save.assert_not_called()
 
-        # check what happens if API fails
+        # record what happens if API fails
         obj = BaseModelInstance(raw={"href": "/"})
         response = mock.Mock()
         response.json.return_value = {
             "error": {
                 "status_code": 500,
                 "fields": {},
-                "message": "Authorization error: please re-check your credentials",
+                "message": "Authorization error: please re-record your credentials",
                 "type": "authorization_error",
             }
         }
@@ -106,62 +104,61 @@ class BaseModelTests(TestCase):
         obj = BaseModelInstance(raw={"href": "/"})
         mock_fetch.return_value = obj
         obj.pull()
-        # check that it has parsed the return value
+        # record that it has parsed the return value
         mock_fetch.assert_called_once_with()
         mock_save.assert_called_once_with()
 
 
 @pytest.mark.django_db
 class TestBaseQuerySet:
-
-    # def create_applicant(self, username):
-    #     """Create new Applicant and user."""
+    # def create_client(self, username):
+    #     """Create new Client and user."""
     #     data = {"id": username, "created_at": tz_now().isoformat()}
     #     user = get_user_model().objects.create_user(username)
-    #     applicant = Applicant.objects.create_applicant(user, raw=data)
-    #     return applicant
+    #     client = Client.objects.create_client(user, raw=data)
+    #     return client
 
     @mock.patch.object(BaseModel, "fetch")
-    def test_fetch(self, mock_fetch, applicant):
-        Applicant.objects.all().fetch()
+    def test_fetch(self, mock_fetch, client):
+        Client.objects.all().fetch()
         assert mock_fetch.call_count == 1
 
     @mock.patch.object(BaseModel, "fetch")
     def test_fetch__empty(self, mock_fetch):
-        Applicant.objects.all().fetch()
+        Client.objects.all().fetch()
         assert mock_fetch.call_count == 0
 
     @mock.patch.object(BaseModel, "fetch")
-    def test_fetch__error(self, mock_fetch, applicant):
-        # check that an error doesn't blow up everything
+    def test_fetch__error(self, mock_fetch, client):
+        # record that an error doesn't blow up everything
         mock_fetch.side_effect = Exception("Something went wrong")
-        Applicant.objects.all().fetch()
+        Client.objects.all().fetch()
         assert mock_fetch.call_count == 1
 
     @mock.patch.object(BaseModel, "pull")
-    def test_pull(self, mock_pull, applicant):
-        Applicant.objects.all().pull()
+    def test_pull(self, mock_pull, client):
+        Client.objects.all().pull()
         assert mock_pull.call_count == 1
 
     @mock.patch.object(BaseModel, "pull")
     def test_pull__empty(self, mock_pull):
-        Applicant.objects.all().pull()
+        Client.objects.all().pull()
         assert mock_pull.call_count == 0
 
     @mock.patch.object(BaseModel, "pull")
-    def test_pull__error(self, mock_pull, applicant):
+    def test_pull__error(self, mock_pull, client):
         mock_pull.side_effect = Exception("Something went wrong")
-        Applicant.objects.all().pull()
+        Client.objects.all().pull()
         assert mock_pull.call_count == 1
 
 
 class BaseStatusModelTests(TestCase):
-    """onfido.models.BaseStatusModel tests."""
+    """amiqus.models.BaseStatusModel tests."""
 
     def test_defaults(self):
         obj = BaseStatusModelInstance()
         self.assertEqual(obj.id, None)
-        self.assertEqual(obj.onfido_id, "")
+        self.assertEqual(obj.amiqus_id, "")
         self.assertEqual(obj.created_at, None)
         self.assertEqual(obj.status, None)
         self.assertEqual(obj.result, None)
@@ -173,18 +170,18 @@ class BaseStatusModelTests(TestCase):
         data = {
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_applicant",
+            "status": "awaiting_client",
             "type": "standard",
             "result": "clear",
         }
         obj = BaseStatusModelInstance().parse(data)
-        self.assertEqual(obj.onfido_id, data["id"])
+        self.assertEqual(obj.amiqus_id, data["id"])
         self.assertEqual(obj.created_at, date_parse(data["created_at"]))
         self.assertEqual(obj.status, data["status"])
         self.assertEqual(obj.result, data["result"])
 
-    @mock.patch("onfido.signals.on_status_change.send")
-    @mock.patch("onfido.signals.on_completion.send")
+    @mock.patch("amiqus.signals.on_status_change.send")
+    @mock.patch("amiqus.signals.on_completion.send")
     @mock.patch.object(BaseStatusModel, "pull")
     @mock.patch.object(BaseStatusModel, "save")
     def test_update_status(self, mock_save, mock_pull, mock_complete, mock_update):
@@ -199,8 +196,8 @@ class BaseStatusModelTests(TestCase):
             event = Event(
                 action="form.opened",
                 status="after",
-                onfido_id="foo",
-                resource_type="check",
+                amiqus_id="foo",
+                resource_type="record",
                 completed_at=now,
             )
             obj = BaseStatusModelInstance(status="before")
@@ -263,7 +260,7 @@ class BaseStatusModelTests(TestCase):
         )
         mock_complete.assert_not_called()
 
-    @mock.patch("onfido.models.base.tz_now")
+    @mock.patch("amiqus.models.base.tz_now")
     def test__override_event(self, mock_now):
         """Test the _override_event method."""
         now = datetime.datetime.now()
@@ -271,7 +268,7 @@ class BaseStatusModelTests(TestCase):
         data = {
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_applicant",
+            "status": "awaiting_client",
             "type": "standard",
             "result": "clear",
             "href": "http://foo",
@@ -279,7 +276,7 @@ class BaseStatusModelTests(TestCase):
         user = get_user_model()()
         obj = BaseStatusModelInstance().parse(data)
         event = obj._override_event(user)
-        self.assertEqual(event.onfido_id, obj.onfido_id)
+        self.assertEqual(event.amiqus_id, obj.amiqus_id)
         self.assertEqual(event.action, "manual.override")
         self.assertEqual(event.resource_type, BaseStatusModelInstance._meta.model_name)
         self.assertEqual(event.status, obj.status)
@@ -292,13 +289,13 @@ class BaseStatusModelTests(TestCase):
         data = {
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_applicant",
+            "status": "awaiting_client",
             "type": "standard",
             "result": None,
             "href": "http://foo",
         }
         user = get_user_model()()
-        obj = Check().parse(data)
+        obj = Record().parse(data)
         self.assertFalse(obj.is_clear)
         obj = obj.mark_as_clear(user)
         mock_save.assert_called_once_with()
@@ -308,76 +305,8 @@ class BaseStatusModelTests(TestCase):
     @mock.patch.object(query.QuerySet, "filter")
     def test_events(self, mock_filter):
         """Test the events method."""
-        obj = BaseStatusModelInstance(onfido_id="foo")
+        obj = BaseStatusModelInstance(amiqus_id="foo")
         obj.events()
         mock_filter.assert_called_once_with(
-            onfido_id="foo", resource_type="basestatusmodelinstance"
+            amiqus_id="foo", resource_type="basestatusmodelinstance"
         )
-
-    @override_settings(SYNC_DELETION=False)
-    @mock.patch("onfido.signals.on_status_change.send")
-    @mock.patch("onfido.signals.on_completion.send")
-    @mock.patch("onfido.models.base.get")
-    @mock.patch.object(BaseStatusModel, "save")
-    def test_fetch_onfido_gone__sync_false(
-        self, mock_save, mock_get, mock_complete, mock_update
-    ):
-        """Test the update_status method."""
-        now = datetime.datetime.now()
-
-        event = Event(
-            action="complete",
-            status=BaseStatusModel.Status.COMPLETE,
-            onfido_id="foo",
-            resource_type="check",
-            completed_at=now,
-        )
-        obj = BaseStatusModelInstance(status=BaseStatusModel.Status.COMPLETE)
-
-        response = mock.Mock()
-        response.status_code = 410
-        response.json.return_value = {
-            "error": {
-                "message": "Check has been deleted",
-                "type": "gone",
-            }
-        }
-
-        mock_get.side_effect = ApiError(response)
-        obj = obj.update_status(event)
-        self.assertEqual(obj.updated_at, now)
-        assert obj.status == BaseStatusModel.Status.COMPLETE
-
-    @override_settings(SYNC_DELETION=True)
-    @mock.patch("onfido.signals.on_status_change.send")
-    @mock.patch("onfido.signals.on_completion.send")
-    @mock.patch("onfido.models.base.get")
-    @mock.patch.object(BaseStatusModel, "save")
-    def test_fetch_onfido_gone__sync_true(
-        self, mock_save, mock_get, mock_complete, mock_update
-    ):
-        """Test the update_status method."""
-        now = datetime.datetime.now()
-
-        event = Event(
-            action="form.opened",
-            status=BaseStatusModel.Status.COMPLETE,
-            onfido_id="foo",
-            resource_type="check",
-            completed_at=now,
-        )
-        obj = BaseStatusModelInstance(status=BaseStatusModel.Status.COMPLETE)
-
-        response = mock.Mock()
-        response.status_code = 410
-        response.json.return_value = {
-            "error": {
-                "message": "Check has been deleted",
-                "type": "gone",
-            }
-        }
-
-        mock_get.side_effect = ApiError(response)
-        obj = obj.update_status(event)
-        self.assertEqual(obj.updated_at, now)
-        assert obj.status == BaseStatusModel.Status.EXPIRED

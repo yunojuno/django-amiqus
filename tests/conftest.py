@@ -5,9 +5,9 @@ import uuid
 import pytest
 from django.contrib.auth import get_user_model
 
-from onfido.models import Applicant, Check, Event, Report
+from amiqus.models import Check, Client, Event, Record
 
-APPLICANT_ID = str(uuid.uuid4())
+CLIENT_ID = str(uuid.uuid4())
 CHECK_ID = str(uuid.uuid4())
 IDENTITY_REPORT_ID = str(uuid.uuid4())
 DOCUMENT_REPORT_ID = str(uuid.uuid4())
@@ -24,45 +24,45 @@ def user():
 
 
 @pytest.fixture
-def applicant(user):
-    data = copy.deepcopy(TEST_APPLICANT)
-    return Applicant.objects.create_applicant(user=user, raw=data)
+def client(user):
+    data = copy.deepcopy(TEST_CLIENT)
+    return Client.objects.create_client(user=user, raw=data)
 
 
 @pytest.fixture
-def check(applicant):
+def record(client):
     data = copy.deepcopy(TEST_CHECK)
-    return Check.objects.create_check(applicant, raw=data)
+    return Record.objects.create_record(client, raw=data)
 
 
 @pytest.fixture
-def identity_report(check):
+def identity_check(record):
     data = copy.deepcopy(TEST_REPORT_IDENTITY_ENHANCED)
-    return Report.objects.create_report(check, raw=data)
+    return Check.objects.create_check(record, raw=data)
+
+
+# @pytest.fixture
+# def document_check(record):
+#     data = copy.deepcopy(TEST_REPORT_DOCUMENT)
+#     return Check.objects.create_check(record, raw=data)
 
 
 @pytest.fixture
-def document_report(check):
-    data = copy.deepcopy(TEST_REPORT_DOCUMENT)
-    return Report.objects.create_report(check, raw=data)
+def check(identity_check):
+    return identity_check
 
 
 @pytest.fixture
-def report(identity_report):
-    return identity_report
-
-
-@pytest.fixture
-def event(check):
+def event(record):
     data = copy.deepcopy(TEST_EVENT)
     return Event().parse(data)
 
 
 # Test data taken from Onfido v3 API docs.
 
-# https://documentation.onfido.com/#applicant-object
-TEST_APPLICANT = {
-    "id": APPLICANT_ID,
+# https://documentation.onfido.com/#client-object
+TEST_CLIENT = {
+    "id": CLIENT_ID,
     "created_at": "2019-10-09T16:52:42Z",
     "sandbox": True,
     "first_name": "Jane",
@@ -70,7 +70,7 @@ TEST_APPLICANT = {
     "email": None,
     "dob": "1990-01-01",
     "delete_at": None,
-    "href": f"/v3/applicants/{APPLICANT_ID}",
+    "href": f"/v2/clients/{CLIENT_ID}",
     "id_numbers": [],
     "address": {
         "flat_number": None,
@@ -88,29 +88,44 @@ TEST_APPLICANT = {
     },
 }
 
-# https://documentation.onfido.com/#check-object
+# https://documentation.onfido.com/#record-object
+
 TEST_CHECK = {
-    "id": CHECK_ID,
-    "created_at": "2019-10-09T17:01:59Z",
-    "status": "in_progress",
-    "redirect_uri": None,
-    "result": None,
-    "sandbox": True,
-    "tags": [],
-    "results_uri": f"https://onfido.com/checks/{CHECK_ID}/reports",
-    "form_uri": None,
-    "paused": False,
-    "version": "3.0",
-    "report_ids": [IDENTITY_REPORT_ID],
-    "href": f"/v3/checks/{CHECK_ID}",
-    "applicant_id": APPLICANT_ID,
-    "applicant_provides_data": False,
+    "object": "record",
+    "id": 705972,
+    "status": "reviewed",
+    "email": "marty.mcfly@example.com",
+    "client": 571374,
+    "checks": {
+        "object": "list",
+        "data": [
+            {
+                "object": "check",
+                "id": 1539425,
+                "type": "document",
+                "record": 705972,
+                "status": "refer",
+                "allow_replay": False,
+                "allow_cancel": False,
+                "requires_consent": True,
+                "created_at": "2023-03-29T19:39:58Z",
+                "updated_at": "2023-03-29T22:50:58Z",
+            }
+        ],
+        "total": 1,
+        "count": 1,
+        "limit": 15,
+        "has_more": False,
+    },
+    "created_at": "2023-03-29T19:39:57Z",
+    "updated_at": "2023-03-30T11:46:13Z",
+    "archived_at": None,
 }
 
-# https://documentation.onfido.com/#identity-enhanced-report
+# https://documentation.onfido.com/#identity-enhanced-check
 TEST_REPORT_IDENTITY_ENHANCED = {
     "created_at": "2019-10-03T15:54:20Z",
-    "href": f"/v3/reports/{IDENTITY_REPORT_ID}",
+    "href": f"/v3/checks/{IDENTITY_REPORT_ID}",
     "id": IDENTITY_REPORT_ID,
     "name": "identity_enhanced",
     "properties": {
@@ -152,107 +167,15 @@ TEST_REPORT_IDENTITY_ENHANCED = {
         },
         "mortality": {"result": "clear"},
     },
-    "check_id": CHECK_ID,
+    "record_id": CHECK_ID,
     "documents": [],
 }
 
-TEST_REPORT_DOCUMENT = {
-    "created_at": "2019-10-03T14:05:48Z",
-    "documents": [{"id": DOCUMENT_ID}],
-    "href": f"/v3/reports/{DOCUMENT_REPORT_ID}",
-    "id": DOCUMENT_REPORT_ID,
-    "name": "document",
-    "properties": {
-        "nationality": "",
-        "last_name": "Names",
-        "issuing_country": "GBR",
-        "gender": "",
-        "first_name": "Report",
-        "document_type": "passport",
-        "document_numbers": [{"value": "123456789", "type": "document_number"}],
-        "date_of_expiry": "2030-01-01",
-        "date_of_birth": "1990-01-01",
-    },
-    "result": "clear",
-    "status": "complete",
-    "sub_result": "clear",
-    "breakdown": {
-        "data_comparison": {
-            "result": "clear",
-            "breakdown": {
-                "issuing_country": {"result": "clear", "properties": {}},
-                "gender": {"result": "clear", "properties": {}},
-                "date_of_expiry": {"result": "clear", "properties": {}},
-                "last_name": {"result": "clear", "properties": {}},
-                "document_type": {"result": "clear", "properties": {}},
-                "document_numbers": {"result": "clear", "properties": {}},
-                "first_name": {"result": "clear", "properties": {}},
-                "date_of_birth": {"result": "clear", "properties": {}},
-            },
-        },
-        "data_validation": {
-            "result": "clear",
-            "breakdown": {
-                "gender": {"result": "clear", "properties": {}},
-                "date_of_birth": {"result": "clear", "properties": {}},
-                "document_numbers": {"result": "clear", "properties": {}},
-                "document_expiration": {"result": "clear", "properties": {}},
-                "expiry_date": {"result": "clear", "properties": {}},
-                "mrz": {"result": "clear", "properties": {}},
-            },
-        },
-        "age_validation": {
-            "result": "clear",
-            "breakdown": {
-                "minimum_accepted_age": {"result": "clear", "properties": {}}
-            },
-        },
-        "image_integrity": {
-            "result": "clear",
-            "breakdown": {
-                "image_quality": {"result": "clear", "properties": {}},
-                "conclusive_document_quality": {"result": "clear", "properties": {}},
-                "supported_document": {"result": "clear", "properties": {}},
-                "colour_picture": {"result": "clear", "properties": {}},
-            },
-        },
-        "visual_authenticity": {
-            "result": "clear",
-            "breakdown": {
-                "fonts": {"result": "clear", "properties": {}},
-                "picture_face_integrity": {"result": "clear", "properties": {}},
-                "template": {"result": "clear", "properties": {}},
-                "security_features": {"result": "clear", "properties": {}},
-                "original_document_present": {"result": "clear", "properties": {}},
-                "digital_tampering": {"result": "clear", "properties": {}},
-                "other": {"result": "clear", "properties": {}},
-                "face_detection": {"result": "clear", "properties": {}},
-            },
-        },
-        "data_consistency": {
-            "result": "clear",
-            "breakdown": {
-                "date_of_expiry": {"result": "clear", "properties": {}},
-                "document_numbers": {"result": "clear", "properties": {}},
-                "issuing_country": {"result": "clear", "properties": {}},
-                "document_type": {"result": "clear", "properties": {}},
-                "date_of_birth": {"result": "clear", "properties": {}},
-                "gender": {"result": "clear", "properties": {}},
-                "first_name": {"result": "clear", "properties": {}},
-                "last_name": {"result": "clear", "properties": {}},
-                "nationality": {"result": "clear", "properties": {}},
-            },
-        },
-        "police_record": {"result": "clear"},
-        "compromised_document": {"result": "clear"},
-    },
-    "check_id": CHECK_ID,
-}
 
 TEST_EVENT = {
     "payload": {
-        "resource_type": "check",
-        "action": "check.form_opened",
+        "resource_type": "record",
+        "action": "record.form_opened",
         "object": {
             "id": CHECK_ID,
             "status": "complete",

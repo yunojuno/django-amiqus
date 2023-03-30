@@ -3,7 +3,7 @@ import copy
 import pytest
 from dateutil.parser import parse as date_parse
 
-from onfido.models import Check, Event, Report
+from amiqus.models import Check, Event, Record
 
 from ..conftest import TEST_EVENT
 
@@ -20,28 +20,28 @@ class TestEventModel:
         with pytest.raises(ValueError):
             event._resource_manager()
 
+        event.resource_type = "record"
+        assert event._resource_manager() == Record.objects
         event.resource_type = "check"
         assert event._resource_manager() == Check.objects
-        event.resource_type = "report"
-        assert event._resource_manager() == Report.objects
 
-    def test_resource(self, check, event):
+    def test_resource(self, record, event):
         """Test the resource property."""
         # this is really testing the pytest fixture "event", which is built from the
         # TEST_EVENT data - see conftest.py for details.
-        assert event.resource == check
+        assert event.resource == record
 
-    def test_user(self, check, event):
+    def test_user(self, record, event):
         # this is really testing the pytest fixture "event", which is built from the
         # TEST_EVENT data - see conftest.py for details.
-        assert event.user == check.applicant.user
+        assert event.user == record.client.user
 
     def test_defaults(self):
         """Test default property values."""
         event = Event()
-        # real data taken from check.json
+        # real data taken from record.json
         assert event.resource_type == ""
-        assert event.onfido_id == ""
+        assert event.amiqus_id == ""
         assert event.action == ""
         assert event.status == ""
         assert event.completed_at is None
@@ -51,9 +51,9 @@ class TestEventModel:
         """Test the parse_raw method."""
         data = copy.deepcopy(TEST_EVENT)
         event = Event().parse(data)
-        # real data taken from check.json
+        # real data taken from record.json
         assert event.resource_type == data["payload"]["resource_type"]
-        assert event.onfido_id == data["payload"]["object"]["id"]
+        assert event.amiqus_id == data["payload"]["object"]["id"]
         assert event.action == data["payload"]["action"]
         assert event.status == data["payload"]["object"]["status"]
         assert event.completed_at == (

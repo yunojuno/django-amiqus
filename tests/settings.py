@@ -8,7 +8,7 @@ USE_TZ = True
 USE_L10N = True
 
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "onfido.db"}}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "amiqus.db"}}
 
 INSTALLED_APPS = (
     "django.contrib.admin",
@@ -17,7 +17,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "onfido",
+    "amiqus",
     "tests.test_app",
 )
 
@@ -51,7 +51,7 @@ AUTH_USER_MODEL = "test_app.User"
 
 STATIC_URL = "/static/"
 
-SECRET_KEY = "onfido"  # noqa: S105
+SECRET_KEY = "amiqus"  # noqa: S105
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -76,7 +76,7 @@ LOGGING = {
         #     'propagate': True,
         #     'level': 'WARNING',
         # },
-        "onfido": {
+        "amiqus": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,

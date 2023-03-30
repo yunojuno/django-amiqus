@@ -4,20 +4,20 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 
-from onfido.models import Applicant, Check, Event, Report
-from onfido.views import status_update
+from amiqus.models import Check, Client, Event, Record
+from amiqus.views import status_update
 
 
 class ViewTests(TestCase):
-    """onfido.views module tests."""
+    """amiqus.views module tests."""
 
-    @mock.patch("onfido.decorators.WEBHOOK_TOKEN")
+    @mock.patch("amiqus.decorators.WEBHOOK_TOKEN")
     def test_status_update(self, *args):
         """Test the status_update view function."""
         data = {
             "payload": {
-                "resource_type": "check",
-                "action": "check.form_completed",
+                "resource_type": "record",
+                "action": "record.form_completed",
                 "object": {
                     "id": "5345badd-f4bf-4240-9f3b-ffb998bda09e",
                     "status": "in_progress",
@@ -28,7 +28,7 @@ class ViewTests(TestCase):
         }
         factory = RequestFactory()
 
-        @mock.patch("onfido.decorators._match", lambda x, y: True)
+        @mock.patch("amiqus.decorators._match", lambda x, y: True)
         def assert_update(data, message):
             request = factory.post(
                 "/",
@@ -47,17 +47,17 @@ class ViewTests(TestCase):
         data["payload"]["resource_type"] = "foo"
         assert_update(data, "Unknown resource type.")
 
+        # unknown Record
+        data["payload"]["resource_type"] = "record"
+        with mock.patch.object(Record, "objects") as mock_manager:
+            mock_manager.get.side_effect = Record.DoesNotExist()
+            assert_update(data, "Record not found.")
+
         # unknown Check
         data["payload"]["resource_type"] = "check"
         with mock.patch.object(Check, "objects") as mock_manager:
             mock_manager.get.side_effect = Check.DoesNotExist()
             assert_update(data, "Check not found.")
-
-        # unknown Report
-        data["payload"]["resource_type"] = "report"
-        with mock.patch.object(Report, "objects") as mock_manager:
-            mock_manager.get.side_effect = Report.DoesNotExist()
-            assert_update(data, "Report not found.")
 
         # unknown exception
         with mock.patch.object(Event, "parse") as mock_parse:
@@ -65,31 +65,30 @@ class ViewTests(TestCase):
             assert_update(data, "Unknown error.")
 
         # valid payload / object
-        mock_check = mock.Mock(spec=Check)
+        mock_record = mock.Mock(spec=Record)
         with mock.patch(
-            "onfido.models.Event.resource",
-            new_callable=mock.PropertyMock(return_value=mock_check),
+            "amiqus.models.Event.resource",
+            new_callable=mock.PropertyMock(return_value=mock_record),
         ):
-            # mock_resource.return_value = mock_check
+            # mock_resource.return_value = mock_record
             assert_update(data, "Update processed.")
-            mock_check.update_status.assert_called_once()
+            mock_record.update_status.assert_called_once()
 
-        # now check that a good payload passes.
-        data["payload"]["resource_type"] = "check"
+        # now record that a good payload passes.
+        data["payload"]["resource_type"] = "record"
         user = get_user_model().objects.create_user("fred")
-        applicant = Applicant(user=user, onfido_id="foo").save()
-        check = Check(user=user, applicant=applicant)
-        check.onfido_id = data["payload"]["object"]["id"]
-        check.save()
+        client = Client(user=user, amiqus_id="foo").save()
+        record = Record(user=user, client=client)
+        record.amiqus_id = data["payload"]["object"]["id"]
+        record.save()
 
         # validate that the LOG_EVENTS setting is honoured
         with mock.patch.object(Event, "save") as mock_save:
-
-            with mock.patch("onfido.views.LOG_EVENTS", False):
+            with mock.patch("amiqus.views.LOG_EVENTS", False):
                 assert_update(data, "Update processed.")
                 mock_save.assert_not_called()
 
             # force creation of event
-            with mock.patch("onfido.views.LOG_EVENTS", True):
+            with mock.patch("amiqus.views.LOG_EVENTS", True):
                 assert_update(data, "Update processed.")
                 mock_save.assert_called_once_with()

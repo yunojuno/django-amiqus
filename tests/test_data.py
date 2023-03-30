@@ -1,7 +1,7 @@
-from onfido.data import check_supported_country, get_countries
+from amiqus.data import get_countries, record_supported_country
 
 
-def test_check_supported_country_matches_json():
+def test_record_supported_country_matches_json():
     test_params = (
         (
             "YEM",
@@ -25,4 +25,4 @@ def test_check_supported_country_matches_json():
     assert len(data) == 249
 
     for test in test_params:
-        assert check_supported_country(test[0]) == test[1]
+        assert record_supported_country(test[0]) == test[1]

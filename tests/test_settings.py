@@ -2,24 +2,23 @@ from unittest import mock
 
 from django.test import TestCase
 
-from onfido import api, settings
+from amiqus import api, settings
 
 
 class SettingsTests(TestCase):
-    """onfido.settings module tests."""
+    """amiqus.settings module tests."""
 
     def test_defaults(self):
         """Confirm the default settings exist."""
-        self.assertEqual(api.API_ROOT, "https://api.onfido.com/v3/")
+        self.assertEqual(api.API_ROOT, "https://id.amiqus.co/api/v2/")
         self.assertEqual(settings.LOG_EVENTS, True)
         self.assertEqual(settings.TEST_MODE, False)
-        self.assertEqual(settings.SYNC_DELETION, False)
         # These may have been set locally
         # self.assertEqual(settings.API_KEY, None)
         # self.assertEqual(settings.WEBHOOK_TOKEN, None)
 
-    def test_default_report_scrubber(self):
-        """Test the report_scrubber default function."""
+    def test_default_check_scrubber(self):
+        """Test the check_scrubber default function."""
         data = {"id": "123", "foo": "bar", "breakdown": {}, "properties": {}}
         # default function should remove breakdown and properties
         data = settings.DEFAULT_REPORT_SCRUBBER(data)
@@ -28,15 +27,15 @@ class SettingsTests(TestCase):
         self.assertTrue("id" in data)
 
     # mock scrubber that does nothing and returns the data unchanged
-    @mock.patch("onfido.settings.scrub_report_data", lambda d: d)
-    def test_override_report_scrubber(self):
-        """Test the report_scrubber default function."""
+    @mock.patch("amiqus.settings.scrub_check_data", lambda d: d)
+    def test_override_check_scrubber(self):
+        """Test the check_scrubber default function."""
         data = {"foo": "bar", "breakdown": {}, "properties": {}}
         # import here otherwise the mock is ineffective
-        from onfido.settings import scrub_report_data
+        from amiqus.settings import scrub_check_data
 
         # default function should remove breakdown and properties
-        scrub_report_data(data)
+        scrub_check_data(data)
         self.assertTrue("breakdown" in data)
         self.assertTrue("properties" in data)
 
@@ -65,7 +64,7 @@ class SettingsTests(TestCase):
             "title": None,
             "town_of_birth": None,
         }
-        clean = settings.DEFAULT_APPLICANT_SCRUBBER(data)
+        clean = settings.DEFAULT_CLIENT_SCRUBBER(data)
         self.assertEqual(
             clean,
             {

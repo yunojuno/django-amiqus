@@ -1,5 +1,60 @@
+# OS
+.DS_Store
+
+# Environment
+/.cache
+/*.venv
+/.env*
+/build
+/venv
+*.tmp
+*.isorted
+package-lock.sha1
+/.direnv/
+
+# Python
 *.pyc
-*.egg-info
-.coverage
-.tox
-poetry.lock
+.mypy_cache/
+__pycache__
+
+# Git
+.gitattributes
+*.orig
+*.diff
+
+# Testing
+/.pytest_cache
+*.coverage
+/.tox
+/yunojuno/tests/output
+/coverage_reports
+htmlcov
+test_rerun*
+test_failures.txt
+test-failures*
+test-rerun*
+
+# Backup
+*.backup
+*.bak
+
+# Databases
+*.db
+*.dump
+*.mmdb
+
+# Editor/IDEs
+*.project
+*.pydevproject
+*.ropeproject
+*.vim
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Ignore everything in .vscode (local settings etc.)
+# except .code-snippets files and the launch.json config
+.vscode/*
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+!.vscode/launch.json

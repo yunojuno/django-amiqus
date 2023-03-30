@@ -2,17 +2,17 @@ from unittest import mock
 
 from django.test import TestCase
 
-from onfido.api import ApiError, _headers, _respond, _url, get, post
+from amiqus.api import ApiError, _headers, _respond, _url, get, post
 
 
 class ApiTests(TestCase):
-    """onfido.api module tests."""
+    """amiqus.api module tests."""
 
     def test__headers(self):
         """Test the _headers function return valid dict."""
         self.assertEqual(
             _headers(api_key="foo"),
-            {"Authorization": "Token token=foo", "Content-Type": "application/json"},
+            {"Authorization": "Bearer foo", "Content-Type": "application/json"},
         )
 
     def test__respond(self):
@@ -26,7 +26,7 @@ class ApiTests(TestCase):
         self.assertRaises(ApiError, _respond, response)
 
     @mock.patch("requests.get")
-    @mock.patch("onfido.api._headers")
+    @mock.patch("amiqus.api._headers")
     def test_get(self, mock_headers, mock_get):
         """Test the get function calls API."""
         response = mock.Mock()
@@ -37,7 +37,7 @@ class ApiTests(TestCase):
         mock_get.assert_called_once_with(_url("/"), headers=headers)
 
     @mock.patch("requests.post")
-    @mock.patch("onfido.api._headers")
+    @mock.patch("amiqus.api._headers")
     def test_post(self, mock_headers, mock_post):
         """Test the get function calls API."""
         response = mock.Mock()
@@ -45,5 +45,5 @@ class ApiTests(TestCase):
         headers = mock_headers.return_value
         data = {"foo": "bar"}
         mock_post.return_value = response
-        self.assertEqual(post("/", data), response.json.return_value)
+        self.assertEqual(post("/", data=data), response.json.return_value)
         mock_post.assert_called_once_with(_url("/"), headers=headers, json=data)

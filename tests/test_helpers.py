@@ -4,50 +4,78 @@ from unittest import mock
 import pytest
 from dateutil.parser import parse as date_parse
 
-from onfido.helpers import (  # import from helpers to deter possible dependency issues
-    Applicant,
+from amiqus.helpers import (  # import from helpers to deter possible dependency issues
     Check,
-    Report,
-    create_applicant,
-    create_check,
+    Client,
+    Record,
+    create_client,
+    create_record,
 )
 
 from .conftest import (
-    TEST_APPLICANT,
     TEST_CHECK,
+    TEST_CLIENT,
     TEST_REPORT_DOCUMENT,
     TEST_REPORT_IDENTITY_ENHANCED,
 )
 
+# from tests.test_app.models import User
+# from amiqus.helpers import create_client, create_record
+# reference = "usr_1231asdas212asasda"
+# checks = {
+#     "document": {
+#         "enabled": True,
+#         "preferences": {
+#             "face": True
+#         }
+#     },
+#     "right_to_work": {
+#         "enabled": True,
+#         "preferences": {}
+#     },
+# }
+# u = User.objects.create(
+#     first_name="Jimmy",
+#     last_name="Cricket",
+#     username="jimmy.cricket",
+#     email="jimmy.cricket@example.com",
+# )
+# client = create_client(u, reference=reference)
+# check = create_record(
+#     client,
+#     check_names=checks,
+#     notification="link",
+# )
+
 
 @pytest.mark.django_db
 class TestHelperFunctions:
-    @mock.patch("onfido.helpers.post")
-    def test_create_applicant(self, mock_post, user):
-        """Test the create_applicant function."""
-        data = deepcopy(TEST_APPLICANT)
+    @mock.patch("amiqus.helpers.post")
+    def test_create_client(self, mock_post, user):
+        """Test the create_client function."""
+        data = deepcopy(TEST_CLIENT)
         mock_post.return_value = data
-        applicant = create_applicant(user)
+        client = create_client(user)
         mock_post.assert_called_once_with(
-            "applicants",
+            "clients",
             {
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "email": user.email,
             },
         )
-        assert applicant.onfido_id == data["id"]
-        assert applicant.user == user
-        assert applicant.created_at == date_parse(data["created_at"])
+        assert client.amiqus_id == data["id"]
+        assert client.user == user
+        assert client.created_at == date_parse(data["created_at"])
 
-    @mock.patch("onfido.helpers.post")
-    def test_create_applicant_with_custom_data(self, mock_post, user):
-        """Test the create_applicant function with extra custom POST data."""
-        data = deepcopy(TEST_APPLICANT)
+    @mock.patch("amiqus.helpers.post")
+    def test_create_client_with_custom_data(self, mock_post, user):
+        """Test the create_client function with extra custom POST data."""
+        data = deepcopy(TEST_CLIENT)
         mock_post.return_value = data
-        create_applicant(user, country="GBR", dob="2016-01-01", gender="male")
+        create_client(user, country="GBR", dob="2016-01-01", gender="male")
         mock_post.assert_called_once_with(
-            "applicants",
+            "clients",
             {
                 "first_name": user.first_name,
                 "last_name": user.last_name,
@@ -58,50 +86,50 @@ class TestHelperFunctions:
             },
         )
 
-    @mock.patch("onfido.helpers.post")
-    @mock.patch("onfido.helpers.get")
-    def test_create_check(self, mock_get, mock_post, user):
-        """Test the create_check function."""
-        applicant_data = deepcopy(TEST_APPLICANT)
+    @mock.patch("amiqus.helpers.post")
+    @mock.patch("amiqus.helpers.get")
+    def test_create_record(self, mock_get, mock_post, user):
+        """Test the create_record function."""
+        client_data = deepcopy(TEST_CLIENT)
         mock_post.return_value = TEST_CHECK
         mock_get.return_value = dict(
-            reports=[TEST_REPORT_DOCUMENT, TEST_REPORT_IDENTITY_ENHANCED]
+            checks=[TEST_REPORT_DOCUMENT, TEST_REPORT_IDENTITY_ENHANCED]
         )
-        applicant = Applicant.objects.create_applicant(user, applicant_data)
+        client = Client.objects.create_client(user, client_data)
 
         # 1. use the defaults.
-        check = create_check(
-            applicant,
-            report_names=[
+        record = create_record(
+            client,
+            check_names=[
                 TEST_REPORT_DOCUMENT["name"],
                 TEST_REPORT_IDENTITY_ENHANCED["name"],
             ],
         )
         mock_post.assert_called_once_with(
-            "checks",
+            "records",
             {
-                "applicant_id": applicant.onfido_id,
-                "report_names": [
-                    Report.ReportType.DOCUMENT.value,
-                    Report.ReportType.IDENTITY_ENHANCED.value,
+                "client_id": client.amiqus_id,
+                "check_names": [
+                    Check.CheckType.DOCUMENT.value,
+                    Check.CheckType.IDENTITY_ENHANCED.value,
                 ],
             },
         )
-        assert Check.objects.get() == check
-        # check we have two reports, and that the raw field matches the JSON
+        assert Record.objects.get() == record
+        # record we have two checks, and that the raw field matches the JSON
         # and that the parse method has run
-        assert Report.objects.count() == 2
+        assert Check.objects.count() == 2
         # confirm that kwargs are merged in correctly
-        check.delete()
+        record.delete()
         mock_post.reset_mock()
-        check = create_check(
-            applicant, report_names=[Report.ReportType.IDENTITY_ENHANCED], foo="bar"
+        record = create_record(
+            client, check_names=[Check.CheckType.IDENTITY_ENHANCED], foo="bar"
         )
         mock_post.assert_called_once_with(
-            "checks",
+            "records",
             {
-                "applicant_id": applicant.onfido_id,
-                "report_names": [Report.ReportType.IDENTITY_ENHANCED.value],
+                "client_id": client.amiqus_id,
+                "check_names": [Check.CheckType.IDENTITY_ENHANCED.value],
                 "foo": "bar",
             },
         )

@@ -3,47 +3,45 @@ import copy
 import pytest
 from dateutil.parser import parse as date_parse
 
-from onfido.models import Check
+from amiqus.models import Record
 
-from ..conftest import APPLICANT_ID, TEST_CHECK
+from ..conftest import CLIENT_ID, TEST_CHECK
 
 
 @pytest.mark.django_db
-class TestCheckManager:
-    """onfido.models.ApplicantManager tests."""
+class TestRecordManager:
+    """amiqus.models.ClientManager tests."""
 
-    def test_create_check(self, user, applicant):
+    def test_create_record(self, user, client):
         """Test the create method parses response."""
         data = copy.deepcopy(TEST_CHECK)
-        check = Check.objects.create_check(applicant=applicant, raw=data)
-        assert check.user == user
-        assert check.applicant == applicant
-        assert check.onfido_id == data["id"]
-        assert check.status == data["status"]
-        assert check.result == data["result"]
-        assert check.created_at == date_parse(data["created_at"])
+        record = Record.objects.create_record(client=client, raw=data)
+        assert record.user == user
+        assert record.client == client
+        assert record.amiqus_id == data["id"]
+        assert record.status == data["status"]
+        assert record.result == data["result"]
+        assert record.created_at == date_parse(data["created_at"])
 
 
 @pytest.mark.django_db
-class TestCheckModel:
-    """onfido.models.Check tests."""
+class TestRecordModel:
+    """amiqus.models.Record tests."""
 
-    def test_defaults(self, user, applicant):
+    def test_defaults(self, user, client):
         """Test default property values."""
-        check = Check(
-            user=user, applicant=applicant, onfido_id=APPLICANT_ID, raw=TEST_CHECK
-        )
-        assert check.onfido_id == APPLICANT_ID
-        assert check.raw == TEST_CHECK
-        assert check.created_at is None
-        assert check.status is None
-        assert check.result is None
+        record = Record(user=user, client=client, amiqus_id=CLIENT_ID, raw=TEST_CHECK)
+        assert record.amiqus_id == CLIENT_ID
+        assert record.raw == TEST_CHECK
+        assert record.created_at is None
+        assert record.status is None
+        assert record.result is None
 
     def test_parse(self):
         """Test the parse_raw method."""
         data = copy.deepcopy(TEST_CHECK)
-        check = Check().parse(data)
-        assert check.onfido_id == TEST_CHECK["id"]
-        assert check.created_at == date_parse(TEST_CHECK["created_at"])
-        assert check.status == "in_progress"
-        assert check.result is None
+        record = Record().parse(data)
+        assert record.amiqus_id == TEST_CHECK["id"]
+        assert record.created_at == date_parse(TEST_CHECK["created_at"])
+        assert record.status == "in_progress"
+        assert record.result is None
