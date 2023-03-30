@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-amiqus"
-version = "3.0"
+version = "0.0.1"
 description = "Django app for integration with Amiqus."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
