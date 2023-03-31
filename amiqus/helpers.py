@@ -64,8 +64,6 @@ def create_record(client: Client, check_names: Iterable, **kwargs: Any) -> Recor
     # We need to use API v1 for this until they add this method to v2 :) :( :)
     response = post("records", data=data, version=1)
     record = Record.objects.create_record(client=client, raw=response)
-    # Get updated record from Amiqus
-    record.pull()
 
     try:
         for response_check in data["checks"]["data"]:
