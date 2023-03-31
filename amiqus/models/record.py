@@ -58,6 +58,8 @@ class Record(BaseStatusModel):
         related_name="amiqus_records",
     )
 
+    perform_url = models.CharField(max_length=200, blank=True, null=True)
+
     status = models.CharField(
         max_length=20,
         help_text=_("The current status of the record / check (from API)."),
@@ -94,6 +96,11 @@ class Record(BaseStatusModel):
         if isinstance(self.status, int):
             self.status = self.deprecated_status_mapper(self.status)
         self.created_at = date_parse(self.raw["created_at"])
+        try:
+            self.perform_url = self.raw["links"]["perform"]
+        except KeyError:
+            # There's no url to perform as part of this request.
+            pass
         try:
             # Loop through all checks in the response, and update our downstream models.
             for response_check in self.raw["checks"]["data"]:
