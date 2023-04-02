@@ -55,6 +55,7 @@ class Event(models.Model):
     def _resource_manager(self) -> models.Manager:
         """Return the appropriate model manager for the resource_type."""
         if self.action not in (
+            "record.bounced",
             "record.created",
             "record.updated",
             "record.finished",
@@ -64,7 +65,7 @@ class Event(models.Model):
             "client.updated",
             "client.status",
         ):
-            raise ValueError(f"Unknown resource type: {self.resource_type}")
+            raise ValueError(f"Unknown resource action: {self.action}")
         if self.resource_type == "record":
             from .record import Record
 
