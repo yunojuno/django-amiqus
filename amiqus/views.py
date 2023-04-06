@@ -28,17 +28,16 @@ def status_update(request: HttpRequest) -> HttpResponse:
     """
     Handle event callbacks from the API.
 
-    This is the request handler which does little other than
-    log the request and call the _webhook function which does
-    the processing. Done like this to make it easier to test
-    without having to set up request objects.
+    This is the request handler which does little other than log the
+    request and call the _webhook function which does the processing.
+    Done like this to make it easier to test without having to set up
+    request objects.
 
-    NB This view function will always return a 200 status -
-    in order to prevent Amiqus from endlessly retrying. The
-    only exceptions to this are caused by the verify_signature
-    decorator - if it cannot verify the callback, then it will
-    return a 403 - which should be ok, as if Amiqus sends the
-    request it should never fail...
+    NB This view function will always return a 200 status - in order to
+    prevent Amiqus from endlessly retrying. The only exceptions to this
+    are caused by the verify_signature decorator - if it cannot verify
+    the callback, then it will return a 403 - which should be ok, as if
+    Amiqus sends the request it should never fail...
 
     """
     received_at = now()

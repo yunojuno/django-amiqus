@@ -6,7 +6,6 @@ from dateutil.parser import parse as date_parse
 from django.contrib.auth import get_user_model
 
 from amiqus.admin import Client, EventsMixin, RawMixin, Record, ResultMixin, UserMixin
-from tests.conftest import TEST_EVENT
 
 
 class TestResultMixin:
@@ -29,8 +28,8 @@ class TestEventsMixin:
     """amiqus.admin.EventsMixin tests."""
 
     @mock.patch.object(Record, "events")
-    def test__events(self, mock_events, event):
-        payload = TEST_EVENT["payload"]
+    def test__events(self, mock_events, event_data, event):
+        payload = event_data["payload"]
         action = payload["action"]
         completed_at = date_parse(payload["object"]["completed_at_iso8601"])
         mock_events.return_value = [event]
