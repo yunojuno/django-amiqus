@@ -8,14 +8,10 @@ from django.contrib.auth import get_user_model
 
 from amiqus.models import Client, Record
 
-# import uuid
-
-
-# CLIENT_ID = str(uuid.uuid4())
-# CHECK_ID = str(uuid.uuid4())
-# IDENTITY_REPORT_ID = str(uuid.uuid4())
-# DOCUMENT_REPORT_ID = str(uuid.uuid4())
-# DOCUMENT_ID = str(uuid.uuid4())
+TEST_CLIENT_ID = 123456
+TEST_RECORD_ID = 789012
+TEST_CHECK_ID = 3456789
+TEST_DOCUMENT_ID = 9876543
 
 User = get_user_model()
 
@@ -55,18 +51,18 @@ def event_data():
 # https://amiqus.github.io/developers/api#tag/Clients
 TEST_CLIENT: dict = {
     "object": "client",
-    "id": 73845,
+    "id": TEST_CLIENT_ID,
     "status": None,
     "name": {
         "object": "name",
         "title": "mr",
         "other_title": None,
-        "first_name": "Martin",
-        "middle_name": "Seamus",
+        "first_name": "Fred",
+        "middle_name": "",
         "last_name": "McFly",
         "name": "Martin McFly",
-        "full_name": "Martin Seamus McFly",
-        "complete_name": "Mr Martin Seamus McFly",
+        "full_name": "Marty McFly",
+        "complete_name": "Mr Martin McFly",
     },
     "email": "marty@example.com",
     "landline": None,
@@ -82,7 +78,7 @@ TEST_CLIENT: dict = {
 # https://amiqus.github.io/developers/api#tag/Records
 TEST_RECORD = {
     "object": "record",
-    "id": 983434,
+    "id": TEST_RECORD_ID,
     "status": "pending",
     "email": "marty@example.com",
     "steps": [
@@ -98,7 +94,7 @@ TEST_RECORD = {
                 "live_document": False,
                 "docs": ["passport", "driving_licence", "national_id"],
             },
-            "check": 82342,
+            "check": TEST_CHECK_ID,
             "cost": 1,
             "completed_at": None,
         },
@@ -115,34 +111,59 @@ TEST_RECORD = {
             "completed_at": None,
         },
     ],
-    "client": 73845,
+    "client": TEST_CLIENT_ID,
     "created_at": "2022-05-22T08:22:12Z",
     "updated_at": "2022-05-22T08:22:12Z",
     "archived_at": None,
 }
+# record returned by the v2 API
+TEST_RECORD_V2 = {
+    "object": "record",
+    "id": TEST_RECORD_ID,
+    "status": "complete",
+    "email": "herman.munster@addams.com",
+    "client": TEST_CLIENT_ID,
+    "checks": {
+        "object": "list",
+        "data": [
+            {
+                "object": "check",
+                "id": TEST_CHECK_ID,
+                "type": "document",
+                "record": TEST_RECORD_ID,
+                "status": "accepted",
+                "allow_replay": False,
+                "allow_cancel": False,
+                "requires_consent": True,
+                "created_at": "2023-04-06T15:09:25Z",
+                "updated_at": "2023-04-06T15:17:38Z",
+            }
+        ],
+        "total": 1,
+        "count": 1,
+        "limit": 15,
+        "has_more": False,
+    },
+    "created_at": "2023-04-06T15:09:25Z",
+    "updated_at": "2023-04-06T15:17:50Z",
+    "archived_at": None,
+}
 
+TEST_CHECK_DOCUMENT = {
+    "allow_cancel": False,
+    "allow_replay": False,
+    "created_at": "2023-04-06T11:37:14Z",
+    "id": TEST_CHECK_ID,
+    "object": "check",
+    "record": TEST_CLIENT_ID,
+    "requires_consent": True,
+    "status": "pending",
+    "type": "document",
+    "updated_at": "2023-04-06T11:37:14Z",
+}
 
 # Webhook event data (anonymised) taken from
 # https://id.amiqus.co/team/workflow/webhooks
-TEST_EVENT_RECORD_FINISHED: dict = {
-    "webhook": {
-        "uuid": "93554561-d946-4c0d-8858-28f038801b47",
-        "created_at": "2023-03-31T22:54:32+00:00",
-        "events": ["*"],
-    },
-    "trigger": {
-        "triggered_at": "2023-04-06T15:17:50+00:00",
-        "alias": "record.finished",
-    },
-    "data": {
-        "record": {
-            "id": 999999,
-            "show": "https://id.amiqus.co/api/records/999999",
-            "download": "https://id.amiqus.co/api/records/999999/download",
-        },
-        "client": {"id": 999999, "show": "https://id.amiqus.co/api/clients/999999"},
-    },
-}
 
 
 TEST_EVENT_FORM_SUBMITTED: dict = {
@@ -155,13 +176,97 @@ TEST_EVENT_FORM_SUBMITTED: dict = {
     "data": {
         "form": {
             "reference": "d2edcfae-8778-4323-ac3e-b847b56728b7",
-            "show": "https://id.amiqus.co/api/clients/999999/forms/d2edcfae-8778-4323-ac3e-b847b56728b7",
+            "show": (
+                f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}"
+                "/forms/d2edcfae-8778-4323-ac3e-b847b56728b7"
+            ),
         },
-        "client": {"id": 999999, "show": "https://id.amiqus.co/api/clients/999999"},
-        "record": {
+        "client": {
             "id": 999999,
-            "show": "https://id.amiqus.co/api/records/999999",
-            "download": "https://id.amiqus.co/api/records/999999/download",
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
+        },
+        "record": {
+            "id": TEST_RECORD_ID,
+            "show": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}",
+            "download": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}/download",
+        },
+    },
+}
+
+TEST_EVENT_CLIENT_RECORD = {
+    "data": {
+        "client": {
+            "id": TEST_CLIENT_ID,
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
+        },
+        "record": {
+            "id": TEST_RECORD_ID,
+            "show": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}",
+            "download": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}/download",
+        },
+    },
+    "trigger": {"alias": "client.record", "triggered_at": "2023-04-06T11:37:16+00:00"},
+    "webhook": {
+        "created_at": "2023-03-31T23:49:44+00:00",
+        "events": ["*"],
+        "uuid": "2d37061a-65e8-4aac-844b-f51dd41d3e6c",
+    },
+}
+
+TEST_EVENT_CLIENT_STATUS = {
+    "data": {
+        "client": {
+            "id": TEST_CLIENT_ID,
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
+        }
+    },
+    "trigger": {"alias": "client.status", "triggered_at": "2023-04-06T11:37:16+00:00"},
+    "webhook": {
+        "created_at": "2023-03-31T23:49:44+00:00",
+        "events": ["*"],
+        "uuid": "2d37061a-65e8-4aac-844b-f51dd41d3e6c",
+    },
+}
+
+TEST_EVENT_RECORD_CREATED = {
+    "data": {
+        "client": {
+            "id": TEST_CLIENT_ID,
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
+        },
+        "record": {
+            "id": TEST_RECORD_ID,
+            "show": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}",
+            "download": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}/download",
+        },
+    },
+    "trigger": {"alias": "record.created", "triggered_at": "2023-04-06T11:37:16+00:00"},
+    "webhook": {
+        "created_at": "2023-03-31T23:49:44+00:00",
+        "events": ["*"],
+        "uuid": "2d37061a-65e8-4aac-844b-f51dd41d3e6c",
+    },
+}
+
+TEST_EVENT_RECORD_FINISHED: dict = {
+    "webhook": {
+        "uuid": "93554561-d946-4c0d-8858-28f038801b47",
+        "created_at": "2023-03-31T22:54:32+00:00",
+        "events": ["*"],
+    },
+    "trigger": {
+        "triggered_at": "2023-04-06T15:17:50+00:00",
+        "alias": "record.finished",
+    },
+    "data": {
+        "record": {
+            "id": TEST_RECORD_ID,
+            "show": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}",
+            "download": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}/download",
+        },
+        "client": {
+            "id": TEST_CLIENT_ID,
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
         },
     },
 }

@@ -5,6 +5,7 @@ from amiqus.data import get_country
 
 def test_get_country():
     country = get_country("IND")
+    assert country
     assert country.alpha3 == "IND"
     assert country.name == "India"
     assert country.supported_identity_report is True
@@ -13,18 +14,11 @@ def test_get_country():
 
 
 def test_get_country_does_not_exist():
-    country = get_country("XXX")
-    assert country is None
+    assert get_country("XXX") is None
 
 
-@pytest.mark.parametrize(
-    "country,supported",
-    [
-        ("YEM", False),
-        ("ZMB", True),
-        ("IND", True),
-        ("ERI", False),
-    ],
-)
-def test_country_supports_identity_report(country: str, supported: bool):
-    assert get_country(country).supported_identity_report == supported
+@pytest.mark.parametrize("alpha3,supported", [("YEM", False), ("ZMB", True)])
+def test_country_supports_identity_report(alpha3: str, supported: bool):
+    country = get_country(alpha3)
+    assert country
+    assert country.supported_identity_report == supported

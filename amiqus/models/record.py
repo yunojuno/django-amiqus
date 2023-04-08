@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from dateutil.parser import parse as date_parse
 from django.conf import settings
@@ -8,7 +9,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .base import BaseQuerySet, BaseStatusModel
-from .client import Client
+
+if TYPE_CHECKING:
+    from .client import Client
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +73,7 @@ class Record(BaseStatusModel):
     )
 
     client = models.ForeignKey(
-        Client,
+        "amiqus.Client",
         on_delete=models.CASCADE,
         help_text=_("The client for whom the record is being made."),
         related_name="records",

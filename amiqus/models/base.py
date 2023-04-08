@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from dateutil.parser import parse as date_parse
 from django.conf import settings
@@ -10,9 +10,11 @@ from django.db import models
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
-from ..api import ApiError, get
+from ..api import get
 from ..signals import on_completion, on_status_change
-from .event import Event
+
+if TYPE_CHECKING:
+    from .event import Event
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +78,7 @@ class BaseModel(models.Model):
         Returns the updated object (unsaved).
 
         """
-        try:
-            return self.parse(get(self.href))
-        except ApiError as e:
-            raise e
+        return self.parse(get(self.href))
 
     def pull(self) -> BaseModel:
         """

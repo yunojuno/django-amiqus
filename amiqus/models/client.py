@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.db import models
@@ -10,7 +11,9 @@ from django.utils.translation import gettext_lazy as _
 from ..settings import scrub_client_data
 from ..signals import on_completion, on_status_change
 from .base import BaseModel, BaseQuerySet
-from .event import Event
+
+if TYPE_CHECKING:
+    from .event import Event
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +79,8 @@ class Client(BaseModel):
         Update the status field of a Client and fire signal(s).
 
         When the app receives an event callback from Amiqus, we update
-        the status of the Client, and then fire the
-        signals that allow external apps to hook in to this event.
+        the status of the Client, and then fire the signals that allow
+        external apps to hook in to this event.
 
         If the update is a change to 'approve', then we fire a second
         signal - 'approved' is the terminal state change, and therefore
