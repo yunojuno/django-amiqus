@@ -2,15 +2,16 @@
 .DS_Store
 
 # Environment
-/.cache
-/*.venv
-/.env*
+.cache
+.venv
+.env*
 /build
 /venv
 *.tmp
 *.isorted
 package-lock.sha1
 /.direnv/
+poetry.lock
 
 # Python
 *.pyc
@@ -26,7 +27,6 @@ __pycache__
 /.pytest_cache
 *.coverage
 /.tox
-/yunojuno/tests/output
 /coverage_reports
 htmlcov
 test_rerun*

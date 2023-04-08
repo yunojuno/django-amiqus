@@ -25,13 +25,6 @@ repos:
         types: [html]
         files: ./templates/.*\.html$
 
-      # python import sorting - will amend files
-      - id: isort
-        entry: poetry run isort
-        language: system
-        name: isort     - Python import sorting
-        types: [python]
-
       # python code formatting - will amend files
       - id: black
         entry: poetry run black
@@ -39,11 +32,11 @@ repos:
         name: black     - Python code formatting
         types: [python]
 
-      # Flake8 includes pyflakes, pycodestyle, mccabe, pydocstyle, bandit
-      - id: flake8
-        entry: poetry run flake8
+      # python code linting - will amend files
+      - id: ruff
+        entry: poetry run ruff --fix
         language: system
-        name: flake8    - Python style enforcement
+        name: ruff      - Python code formatting
         types: [python]
 
       # python static type checking
