@@ -1,7 +1,7 @@
 default_stages: [commit]
 
 default_language_version:
-  python: python3.10
+  python: python3.11
 
 repos:
   # Note that all of the `local` repo hooks are version managed by
