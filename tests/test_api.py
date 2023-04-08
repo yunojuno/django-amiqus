@@ -3,6 +3,7 @@ from unittest import mock
 from django.test import TestCase
 
 from amiqus.api import ApiError, _headers, _respond, _url, get, post
+from amiqus.settings import DEFAULT_REQUESTS_TIMEOUT
 
 
 class ApiTests(TestCase):
@@ -34,7 +35,11 @@ class ApiTests(TestCase):
         headers = mock_headers.return_value
         mock_get.return_value = response
         self.assertEqual(get("/"), response.json.return_value)
-        mock_get.assert_called_once_with(_url("/"), headers=headers)
+        mock_get.assert_called_once_with(
+            _url("/", 1),
+            headers=headers,
+            timeout=DEFAULT_REQUESTS_TIMEOUT,
+        )
 
     @mock.patch("requests.post")
     @mock.patch("amiqus.api._headers")
@@ -46,4 +51,9 @@ class ApiTests(TestCase):
         data = {"foo": "bar"}
         mock_post.return_value = response
         self.assertEqual(post("/", data=data), response.json.return_value)
-        mock_post.assert_called_once_with(_url("/"), headers=headers, json=data)
+        mock_post.assert_called_once_with(
+            _url("/", 1),
+            headers=headers,
+            json=data,
+            timeout=DEFAULT_REQUESTS_TIMEOUT,
+        )

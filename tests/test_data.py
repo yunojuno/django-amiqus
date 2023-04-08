@@ -1,28 +1,30 @@
-from amiqus.data import get_countries, record_supported_country
+import pytest
+
+from amiqus.data import get_country
 
 
-def test_record_supported_country_matches_json():
-    test_params = (
-        (
-            "YEM",
-            False,
-        ),
-        (
-            "ZMB",
-            True,
-        ),
-        (
-            "IND",
-            True,
-        ),
-        (
-            "ERI",
-            False,
-        ),
-    )
+def test_get_country():
+    country = get_country("IND")
+    assert country.alpha3 == "IND"
+    assert country.name == "India"
+    assert country.supported_identity_report is True
+    assert country.region == "Asia"
+    assert country.subregion == "Southern Asia"
 
-    data = get_countries()
-    assert len(data) == 249
 
-    for test in test_params:
-        assert record_supported_country(test[0]) == test[1]
+def test_get_country_does_not_exist():
+    country = get_country("XXX")
+    assert country is None
+
+
+@pytest.mark.parametrize(
+    "country,supported",
+    [
+        ("YEM", False),
+        ("ZMB", True),
+        ("IND", True),
+        ("ERI", False),
+    ],
+)
+def test_country_supports_identity_report(country: str, supported: bool):
+    assert get_country(country).supported_identity_report == supported

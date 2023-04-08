@@ -44,6 +44,19 @@ class TestCreateClient:
             },
         )
 
+    @mock.patch("amiqus.helpers.post")
+    def test_create_client_with_name_override(self, mock_post, client_data, user):
+        """Test the create_client function with a name override."""
+        mock_post.return_value = client_data
+        create_client(user, name={"first_name": "Foo", "last_name": "Bar"})
+        mock_post.assert_called_once_with(
+            "clients",
+            data={
+                "name": {"first_name": "Foo", "last_name": "Bar"},
+                "email": user.email,
+            },
+        )
+
     # @mock.patch("amiqus.helpers.post")
     # @mock.patch("amiqus.helpers.get")
     # def test_create_record(self, client_data, record_data, mock_get, mock_post, user):
