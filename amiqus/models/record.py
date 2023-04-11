@@ -91,8 +91,6 @@ class Record(BaseStatusModel):
 
     def parse(self, raw_json: dict) -> Record:
         """Parse the raw value out into other properties."""
-        from .check import Check
-
         self.raw = raw_json
         self.amiqus_id = self.raw["id"]
         self.status = self.raw["status"]
@@ -105,9 +103,11 @@ class Record(BaseStatusModel):
             # There's no url to perform as part of this request.
             pass
         try:
+            from .check import Check
+
             # Loop through all checks in the response, and update our downstream models.
             for response_check in self.raw["checks"]["data"]:
-                check, created = Check.objects.get_or_create(
+                check, _ = Check.objects.get_or_create(
                     amiqus_id=response_check["id"],
                     user=self.user,
                     check_type=response_check["type"],
@@ -127,9 +127,10 @@ class Record(BaseStatusModel):
         """
         Return a v2 status for a v1 endpoint.
 
-        V1 endpoint returns an integer based status value.
-        V2 endpoint returns and uses a text based status value.
-        This function patches the two.
+        V1 endpoint returns an integer based status value. V2 endpoint
+        returns and uses a text based status value. This function
+        patches the two.
+
         """
         CHECK_STATUS_MAP = {
             0: self.RecordStatus.PENDING.value,  # type: ignore[attr-defined]
@@ -142,9 +143,4 @@ class Record(BaseStatusModel):
             7: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
             8: self.RecordStatus.REVIEWED.value,  # type: ignore[attr-defined]
         }
-
-        try:
-            return CHECK_STATUS_MAP[status]
-        except KeyError:
-            logger.debug("Status not in deprecated status map: %s", status)
-            return None
+        return CHECK_STATUS_MAP[status]

@@ -3,12 +3,11 @@ from unittest import mock
 
 import pytest
 from dateutil.parser import parse as date_parse
-from django.contrib.auth import get_user_model
 from django.db.models import Model, query
 from django.test import TestCase
 
 from amiqus.api import ApiError
-from amiqus.models import Client, Event, Record
+from amiqus.models import Client, Event
 from amiqus.models.base import BaseModel, BaseStatusModel
 
 
@@ -161,7 +160,6 @@ class BaseStatusModelTests(TestCase):
         self.assertEqual(obj.amiqus_id, "")
         self.assertEqual(obj.created_at, None)
         self.assertEqual(obj.status, None)
-        self.assertEqual(obj.result, None)
         self.assertEqual(obj.updated_at, None)
         self.assertEqual(obj.raw, None)
 
@@ -171,14 +169,11 @@ class BaseStatusModelTests(TestCase):
             "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
             "created_at": "2016-10-15T19:05:50Z",
             "status": "awaiting_client",
-            "type": "standard",
-            "result": "clear",
         }
         obj = BaseStatusModelInstance().parse(data)
         self.assertEqual(obj.amiqus_id, data["id"])
         self.assertEqual(obj.created_at, date_parse(data["created_at"]))
-        self.assertEqual(obj.status, data["status"])
-        self.assertEqual(obj.result, data["result"])
+        self.assertEqual(obj.status, "awaiting_client")
 
     @mock.patch("amiqus.signals.on_status_change.send")
     @mock.patch("amiqus.signals.on_completion.send")
@@ -228,7 +223,7 @@ class BaseStatusModelTests(TestCase):
 
         # if we send 'complete' as the status we should fire the second signal
         event, obj = reset()
-        event.status = BaseStatusModel.Status.COMPLETE
+        event.status = BaseStatusModel.Status.ACCEPTED
         obj = obj.update_status(event)
         self.assertEqual(obj.status, event.status)
         self.assertEqual(obj.updated_at, now)
@@ -259,48 +254,6 @@ class BaseStatusModelTests(TestCase):
             status_after=event.status,
         )
         mock_complete.assert_not_called()
-
-    @mock.patch("amiqus.models.base.tz_now")
-    def test__override_event(self, mock_now):
-        """Test the _override_event method."""
-        now = datetime.datetime.now()
-        mock_now.return_value = now
-        data = {
-            "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
-            "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_client",
-            "type": "standard",
-            "result": "clear",
-            "href": "http://foo",
-        }
-        user = get_user_model()()
-        obj = BaseStatusModelInstance().parse(data)
-        event = obj._override_event(user)
-        self.assertEqual(event.amiqus_id, obj.amiqus_id)
-        self.assertEqual(event.action, "manual.override")
-        self.assertEqual(event.resource_type, BaseStatusModelInstance._meta.model_name)
-        self.assertEqual(event.status, obj.status)
-        self.assertEqual(event.completed_at, now)
-
-    @mock.patch.object(Event, "save")
-    @mock.patch.object(BaseStatusModel, "save")
-    def test_mark_as_clear(self, mock_save, mock_event_save):
-        """Test the mark_as_clear method."""
-        data = {
-            "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
-            "created_at": "2016-10-15T19:05:50Z",
-            "status": "awaiting_client",
-            "type": "standard",
-            "result": None,
-            "href": "http://foo",
-        }
-        user = get_user_model()()
-        obj = Record().parse(data)
-        self.assertFalse(obj.is_clear)
-        obj = obj.mark_as_clear(user)
-        mock_save.assert_called_once_with()
-        mock_event_save.assert_called_once_with()
-        self.assertTrue(obj.is_clear)
 
     @mock.patch.object(query.QuerySet, "filter")
     def test_events(self, mock_filter):

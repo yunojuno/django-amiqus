@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @verify_signature()
-def status_update(request: HttpRequest) -> HttpResponse:
+def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
     """
     Handle event callbacks from the API.
 
@@ -41,9 +41,16 @@ def status_update(request: HttpRequest) -> HttpResponse:
     """
     received_at = now()
     logger.debug("Received Amiqus callback: %s", request.body)
-    data = json.loads(request.body)
-    trigger = data["trigger"]
-    alias = trigger["alias"]
+    if not (data := json.loads(request.body)):
+        logger.exception("Received empty Amiqus webhook body.")
+        return HttpResponse("Empty webhook.")
+    try:
+        trigger = data["trigger"]
+        alias = trigger["alias"]
+    except KeyError:
+        logger.exception("Invalid Amiqus webhook body.")
+        return HttpResponse("Invalid webhook body.")
+
     entity_type = alias.split(".")[0]
     event = Event(received_at=received_at)
 

@@ -5,9 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from dateutil.parser import parse as date_parse
-from django.conf import settings
 from django.db import models
-from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
 from ..api import get
@@ -114,7 +112,7 @@ class BaseQuerySet(models.QuerySet):
 
 
 class BaseStatusModel(BaseModel):
-    """Base class for models with a status and result field."""
+    """Base class for models with a status field."""
 
     class Status(models.TextChoices):
         """Combined list of states values for record / check."""
@@ -152,39 +150,7 @@ class BaseStatusModel(BaseModel):
             amiqus_id=self.amiqus_id, resource_type=self._meta.model_name
         )
 
-    def _override_event(self, user: settings.AUTH_USER_MODEL) -> Event:
-        """
-        Create a fake override event for the object.
-
-        This method uses the current object to create a fake Event payload,
-        which is then parsed into an Event object, used to fake result
-        transitions.
-
-        NB the Event object isn't saved in this method.
-
-        Args:
-            user: User object, the person who is making the fake transition (
-                used for auditing purposes).
-
-        Returns a new (unsaved) Event that can be used to audit a fake transition.
-
-        """
-        payload = {
-            "payload": {
-                "action": "manual.override",
-                "object": {
-                    "completed_at_iso8601": tz_now().isoformat(),
-                    "href": self.href,
-                    "id": self.amiqus_id,
-                    "status": self.status,
-                },
-                "resource_type": self._meta.model_name,
-                "user_id": user.id,
-            }
-        }
-        return Event().parse(payload, entity_type="manual")
-
-    def update_status(self, event: Event) -> Event:
+    def update_status(self, event: Event) -> BaseStatusModel:
         """
         Update the status field of the object and fire signal(s).
 
@@ -231,7 +197,7 @@ class BaseStatusModel(BaseModel):
             on_completion.send(self.__class__, instance=self)
         return self
 
-    def parse(self, raw_json: dict) -> Event:
+    def parse(self, raw_json: dict) -> BaseStatusModel:
         """Parse the raw value out into other properties."""
         super().parse(raw_json)
         self.status = self.raw["status"]
