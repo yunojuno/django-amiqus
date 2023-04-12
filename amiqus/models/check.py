@@ -130,7 +130,7 @@ class Check(BaseStatusModel):
         V2 endpoint returns and uses a text based status value.
         This function patches the two.
         """
-        CHECK_STATUS_MAP = {
+        return {
             0: self.CheckStatus.PENDING.value,  # type: ignore[attr-defined]
             1: self.CheckStatus.SUBMITTED.value,  # type: ignore[attr-defined]
             2: self.CheckStatus.ACCEPTED.value,  # type: ignore[attr-defined]
@@ -138,10 +138,4 @@ class Check(BaseStatusModel):
             4: self.CheckStatus.REFER.value,  # type: ignore[attr-defined]
             5: self.CheckStatus.FAILED.value,  # type: ignore[attr-defined]
             6: self.CheckStatus.PAUSED.value,  # type: ignore[attr-defined]
-        }
-
-        try:
-            return CHECK_STATUS_MAP[status]
-        except KeyError:
-            logger.debug("Status not in deprecated status map: %s", status)
-            return None
+        }[status]

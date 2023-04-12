@@ -10,11 +10,11 @@ on:
 
 jobs:
   format:
-    name: Record formatting
+    name: Run black, ruff, mypy
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toxenv: [lint,mypy]
+        toxenv: [fmt,lint,mypy]
     env:
       TOXENV: ${{ matrix.toxenv }}
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.db import models
@@ -10,18 +11,21 @@ from django.utils.translation import gettext_lazy as _
 from ..settings import scrub_client_data
 from ..signals import on_completion, on_status_change
 from .base import BaseModel, BaseQuerySet
-from .event import Event
+
+if TYPE_CHECKING:
+    from .event import Event
 
 logger = logging.getLogger(__name__)
 
 
-class ClientQuerySet(BaseQuerySet):
-    """Custom Client queryset."""
-
+class ClientManager(models.Manager):
     def create_client(self, user: settings.AUTH_USER_MODEL, raw: dict) -> Client:
         """Create a new client in Amiqus from a user."""
         logger.debug("Creating new Amiqus client from JSON: %s", raw)
-        return Client(user=user).parse(raw).save()
+        client = Client(user=user)
+        client.parse(raw)
+        client.save()
+        return client
 
 
 class Client(BaseModel):
@@ -51,7 +55,7 @@ class Client(BaseModel):
         null=True,
     )
 
-    objects = ClientQuerySet.as_manager()
+    objects = ClientManager.from_queryset(BaseQuerySet)()
 
     def __str__(self) -> str:
         return str(self.user)
@@ -76,8 +80,8 @@ class Client(BaseModel):
         Update the status field of a Client and fire signal(s).
 
         When the app receives an event callback from Amiqus, we update
-        the status of the Client, and then fire the
-        signals that allow external apps to hook in to this event.
+        the status of the Client, and then fire the signals that allow
+        external apps to hook in to this event.
 
         If the update is a change to 'approve', then we fire a second
         signal - 'approved' is the terminal state change, and therefore
@@ -115,9 +119,6 @@ class Client(BaseModel):
             status_before=old_status,
             status_after=event.status,
         )
-        if (
-            event.status
-            == self.ClientStatus.APPROVED.value  # type: ignore[attr-defined]
-        ):
+        if event.status == self.ClientStatus.APPROVED.value:
             on_completion.send(self.__class__, instance=self)
         return self
