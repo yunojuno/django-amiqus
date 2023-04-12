@@ -1,9 +1,9 @@
 import json
+from unittest import mock
 
 from django.test import RequestFactory
 
-from amiqus.decorators import _hmac
-from amiqus.models import Check, Client, Event, Record
+from amiqus.models import Check, Event, Record
 from amiqus.views import status_update
 
 
@@ -74,5 +74,6 @@ class TestViews:
         #     # force creation of event
         #     with mock.patch("amiqus.views.LOG_EVENTS", True):
         #         assert_update(event_data, "Update processed.")
+        #         mock_save.assert_called_once_with()
         #         mock_save.assert_called_once_with()
         #         mock_save.assert_called_once_with()
