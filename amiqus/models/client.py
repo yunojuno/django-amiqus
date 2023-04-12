@@ -19,11 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class ClientManager(models.Manager):
-
     def create_client(self, user: settings.AUTH_USER_MODEL, raw: dict) -> Client:
         """Create a new client in Amiqus from a user."""
         logger.debug("Creating new Amiqus client from JSON: %s", raw)
-        return Client(user=user).parse(raw).save()
+        client = Client(user=user)
+        client.parse(raw)
+        client.save()
+        return client
 
 
 class Client(BaseModel):
@@ -117,9 +119,6 @@ class Client(BaseModel):
             status_before=old_status,
             status_after=event.status,
         )
-        if (
-            event.status
-            == self.ClientStatus.APPROVED.value  # type: ignore[attr-defined]
-        ):
+        if event.status == self.ClientStatus.APPROVED.value:
             on_completion.send(self.__class__, instance=self)
         return self
