@@ -18,8 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ClientQuerySet(BaseQuerySet):
-    """Custom Client queryset."""
+class ClientManager(models.Manager):
 
     def create_client(self, user: settings.AUTH_USER_MODEL, raw: dict) -> Client:
         """Create a new client in Amiqus from a user."""
@@ -54,7 +53,7 @@ class Client(BaseModel):
         null=True,
     )
 
-    objects = ClientQuerySet.as_manager()
+    objects = ClientManager.from_queryset(BaseQuerySet)()
 
     def __str__(self) -> str:
         return str(self.user)

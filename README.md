@@ -8,7 +8,27 @@ The current version supports Django 3.2+/4.0+ and Python 3.8+.
 
 ## Background
 
-Amiqus is an online identity verification service. We use this library to integrate with it.
+Amiqus is an online identity verification service. We use this library
+to integrate with it.
+
+## Amiqus workflow
+
+There are three core entities that are modelled in this app: `Client`,
+`Records`, and `Check` (pending deprecation, and soon to be renamed
+`Step`). At a high level they fit together thus:
+
+1. A `Client` represents someone against whom you wish to carry out an
+identity or background check. They are unique within Amiqus, although
+it's possible to carry out multiple checks over a period of time against
+one user.
+1. A `Record` is a suite of checks that will have an overall status that
+combines the statuses of all the constituent checks.
+1. A `Check` / `Step` is an individual check - it could be an identity
+   check, a facial recognition check, etc. See the API for all details.
+
+### `Client`
+
+An
 
 
 ## Installation

@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @verify_signature()
-def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
     """
     Handle event callbacks from the API.
 

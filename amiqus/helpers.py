@@ -15,10 +15,10 @@ def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
     Args:
         user: a Django User instance to register as a Client.
     Kwargs:
-       any kwargs passed in are merged into the data dict sent to the API. This
-       enables support for additional client properties - e.g dob, gender,
-       country, and any others that may change over time.
-       See https://documentation.onfido.com/#create-client for details.
+       any kwargs passed in are merged into the data dict sent to the
+       API. This enables support for additional client properties - e.g
+       dob, gender, country, and any others that may change over time.
+
     """
     data = {
         "name": {
@@ -37,14 +37,14 @@ def create_record(client: Client, check_names: Iterable, **kwargs: Any) -> Recor
     Create a new Record (and child Checks).
 
     Args:
-        client: Client for whom the records are being made.
-        check_names: list of strings, each of which is a valid check type.
+        client: Client for whom the records are being made. check_names:
+        list of strings, each of which is a valid check type.
 
     Kwargs:
-        any kwargs passed in are merged into the data dict sent to the API. This
-        enables support for additional record properties - e.g. redirect_uri,
-        tags, suppress_form_emails and any other that may change over time. See
-        https://documentation.onfido.com/#records for details.
+        any kwargs passed in are merged into the data dict sent to the
+        API. This enables support for additional record properties -
+        e.g. redirect_uri, tags, suppress_form_emails and any other that
+        may change over time. See
 
     Returns a new Record object, and creates the child Check objects.
 

@@ -97,6 +97,5 @@ class Event(models.Model):
         self.action = trigger["alias"]
         obj = data[entity_type]
         self.amiqus_id = obj["id"]
-        # self.status = obj["status"]
         self.completed_at = date_parse(trigger["triggered_at"])
         return self
