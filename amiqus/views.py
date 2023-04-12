@@ -15,7 +15,7 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
 from .decorators import verify_signature
-from .models import Check, Event, Record
+from .models import Client, Event, Record
 from .settings import LOG_EVENTS
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,9 @@ def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
         return HttpResponse("Invalid webhook body.")
 
     entity_type = alias.split(".")[0]
+    if entity_type not in ("client", "record"):
+        logger.error("Invalid entity_type: %s", entity_type)
+        return HttpResponse("Invalid event trigger.")
     event = Event(received_at=received_at)
 
     try:
@@ -61,24 +64,24 @@ def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
             event.save()
         return HttpResponse("Update processed.")
     except KeyError as ex:
-        logger.warning("Missing Amiqus event content.", exc_info=ex)
+        logger.exception("Missing Amiqus event content.", exc_info=ex)
         return HttpResponse("Unexpected event content.")
     except ValueError:
-        logger.warning("Unknown Amiqus resource type: %s", event.resource_type)
+        logger.exception("Unknown Amiqus resource type: %s", event.resource_type)
         return HttpResponse("Unknown resource type.")
     except Record.DoesNotExist:
         # TODO(source-of-truth) Create Record when *new* request is spawned from Amiqus
         # Missing Records can be synchronised as we utilise a reference shared
         # between the user, and Amiqus itself.
-        logger.warning("Amiqus record does not exist: %s", event.amiqus_id)
+        logger.exception("Amiqus record does not exist: %s", event.amiqus_id)
         # 1. Get Record from API.
         # 2. Get Client attached to Record
         # 3. Use their reference to match with a user on system
         # 4. Create record as normal
         return HttpResponse("Record not found.")
-    except Check.DoesNotExist:
-        logger.warning("Amiqus check does not exist: %s", event.amiqus_id)
-        return HttpResponse("Check not found.")
+    except Client.DoesNotExist:
+        logger.warning("Amiqus client does not exist: %s", event.amiqus_id)
+        return HttpResponse("Client not found.")
     except Exception:  # noqa: B902
         logger.exception("Amiqus update could not be processed.")
         return HttpResponse("Unknown error.")

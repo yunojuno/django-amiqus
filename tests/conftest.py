@@ -44,8 +44,13 @@ def record(client, record_data):
 
 
 @pytest.fixture
-def event_data():
-    return copy.deepcopy(TEST_EVENT_FORM_SUBMITTED)
+def client_status_event():
+    return copy.deepcopy(TEST_EVENT_CLIENT_STATUS)
+
+
+@pytest.fixture
+def record_finished_event():
+    return copy.deepcopy(TEST_EVENT_RECORD_FINISHED)
 
 
 # https://amiqus.github.io/developers/api#tag/Clients
