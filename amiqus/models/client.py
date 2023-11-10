@@ -34,7 +34,7 @@ class Client(BaseModel):
     base_href = "clients"
 
     class ClientStatus(models.TextChoices):
-        UNKNOWN = (None, _("Unknown"))
+        UNKNOWN = ("unknown", _("Unknown"))
         APPROVED = ("approved", _("Approved"))
         REJECTED = ("rejected", _("Rejected"))
         FOR_REVIEW = ("pending", _("Needs review"))
