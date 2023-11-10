@@ -119,6 +119,6 @@ class Client(BaseModel):
             status_before=old_status,
             status_after=event.status,
         )
-        if event.status == self.ClientStatus.APPROVED.value:
+        if event.status == self.ClientStatus.APPROVED.value:  # type: ignore[attr-defined]
             on_completion.send(self.__class__, instance=self)
         return self
