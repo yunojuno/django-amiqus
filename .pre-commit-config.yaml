@@ -1,47 +1,30 @@
-default_stages: [commit]
-
-default_language_version:
-  python: python3.11
-
 repos:
-  # Note that all of the `local` repo hooks are version managed by
-  # poetry. This is done to ensure that the same versions are used locally
-  # as in CI. Update them via poetry when needed.
-  - repo: local
+  # python code formatting - will amend files
+  - repo: https://github.com/ambv/black
+    rev: 23.10.1
     hooks:
-      # Ensure poetry installed package versions are up-to-date with lockfile
-      - id: poetry-install
-        entry: poetry lock --check
-        language: system
-        name: poetry    - Python package installation
-        pass_filenames: false
-        types_or: [python, html]
-
-      # Django template formatting - will amend files
-      - id: djhtml
-        entry: poetry run djhtml
-        language: system
-        name: djhtml    - Django template formatting
-        types: [html]
-        files: ./templates/.*\.html$
-
-      # python code formatting - will amend files
       - id: black
-        entry: poetry run black
-        language: system
-        name: black     - Python code formatting
-        types: [python]
 
-      # python code linting - will amend files
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    # Ruff version.
+    rev: "v0.1.5"
+    hooks:
       - id: ruff
-        entry: poetry run ruff --fix
-        language: system
-        name: ruff      - Python code formatting
-        types: [python]
+        args: [--fix, --exit-non-zero-on-fix]
 
-      # python static type checking
+  # python static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.0
+    hooks:
       - id: mypy
-        entry: poetry run mypy
-        language: system
-        name: mypy      - Python type checking
-        types: [python]
+        args:
+          - --disallow-untyped-defs
+          - --disallow-incomplete-defs
+          - --check-untyped-defs
+          - --no-implicit-optional
+          - --ignore-missing-imports
+          - --follow-imports=silent
+        additional_dependencies:
+          - types-python-dateutil
+          - types-requests
+          - types-simplejson

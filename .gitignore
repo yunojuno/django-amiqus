@@ -58,3 +58,5 @@ test-rerun*
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 !.vscode/launch.json
+
+dist

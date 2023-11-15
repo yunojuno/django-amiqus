@@ -34,7 +34,7 @@ class Client(BaseModel):
     base_href = "clients"
 
     class ClientStatus(models.TextChoices):
-        UNKNOWN = (None, _("Unknown"))
+        UNKNOWN = ("", _("Unknown"))
         APPROVED = ("approved", _("Approved"))
         REJECTED = ("rejected", _("Rejected"))
         FOR_REVIEW = ("pending", _("Needs review"))
@@ -119,6 +119,6 @@ class Client(BaseModel):
             status_before=old_status,
             status_after=event.status,
         )
-        if event.status == self.ClientStatus.APPROVED.value:
+        if event.status == self.ClientStatus.APPROVED.value:  # type: ignore[attr-defined]
             on_completion.send(self.__class__, instance=self)
         return self

@@ -1,0 +1,10 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## v0.2
+
+- Add Django 5.0 to build matrix
+- Add Python 3.12 to build matrix
+
+No code changes.
