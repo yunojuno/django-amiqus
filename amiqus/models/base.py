@@ -23,6 +23,7 @@ class BaseModel(models.Model):
     # used to format the href - override in subclasses
     base_href = ""
 
+    # Should this be an integer field?
     amiqus_id = models.CharField(
         "Amiqus ID",
         unique=True,
@@ -56,8 +57,8 @@ class BaseModel(models.Model):
         """Parse the raw value out into other properties."""
         self.raw = raw_json
         self.amiqus_id = self.raw["id"]
-        self.status = self.raw["status"]
-        self.created_at = date_parse(self.raw["created_at"])
+        self.status = self.raw.get("status", None)
+        self.created_at = date_parse(self.raw.get("created_at", None))
 
         return self
 
@@ -200,7 +201,7 @@ class BaseStatusModel(BaseModel):
     def parse(self, raw_json: dict) -> BaseStatusModel:
         """Parse the raw value out into other properties."""
         super().parse(raw_json)
-        self.status = self.raw["status"]
+        self.status = self.raw.get("status", None)
         return self
 
     @property

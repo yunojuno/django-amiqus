@@ -73,6 +73,7 @@ class Client(BaseModel):
 
         """
         super().parse(scrub_client_data(raw_json))
+        self.status = self.raw["status"]
         return self
 
     def update_status(self, event: Event) -> Client:

@@ -34,25 +34,26 @@ class RecordQuerySet(BaseQuerySet):
         )
 
         # Now handle the checks/steps after record is saved
-        try:
-            from .check import Check
+        from .check import Check
 
-            for step in raw.get("steps", []):
-                if step.get("check"):
-                    # Use get_or_create but with the saved record
-                    check, created = Check.objects.get_or_create(
-                        amiqus_id=step["check"],
-                        amiqus_record=record,
-                        defaults={
-                            "user": record.user,
-                            "check_type": step["type"],
-                        },
-                    )
-                    if created or check.check_type != step["type"]:
-                        check.parse(step)
-                        check.save()
-        except KeyError:
-            pass
+        for step in raw.get("steps", []):
+            if step.get("check"):
+                # Use get_or_create but with the saved record
+                if step["type"] == "check.watchlist":
+                    if step["preferences"].get("search_profile"):
+                        check_type = (
+                            "check.watchlist." + step["preferences"]["search_profile"]
+                        )
+                else:
+                    check_type = step["type"]
+                Check.objects.get_or_create(
+                    amiqus_id=step["check"],
+                    amiqus_record=record,
+                    check_type=check_type,
+                    defaults={
+                        "user": record.user,
+                    },
+                )
 
         return record
 

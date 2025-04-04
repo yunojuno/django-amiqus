@@ -73,6 +73,10 @@ class Check(BaseStatusModel):
         PROOF_OF_ADDRESS = ("proof_of_address", "Proof of Address")
         RIGHT_TO_WORK = ("right_to_work", "Right to Work")
         PHOTO_ID = ("check.photo_id", "Photo ID")
+        WATCHLIST_PEPS_SANCTIONS_MEDIA_EXTENDED = (
+            "check.watchlist.peps_sanctions_media_extended",
+            "Watchlist (PEPs, Sanctions, Media, Extended)",
+        )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

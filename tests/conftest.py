@@ -11,6 +11,7 @@ from amiqus.models import Client, Record
 TEST_CLIENT_ID = 123456
 TEST_RECORD_ID = 789012
 TEST_CHECK_ID = 3456789
+TEST_CHECK_ID_2 = 9876543
 TEST_DOCUMENT_ID = 9876543
 
 User = get_user_model()
@@ -100,6 +101,23 @@ TEST_RECORD = {
                 "docs": ["passport", "driving_licence", "national_id"],
             },
             "check": TEST_CHECK_ID,
+            "cost": 1,
+            "completed_at": None,
+        },
+        {
+            "object": "step",
+            "id": 3,
+            "type": "check.watchlist",
+            "preferences": {
+                "report_type": "standard",
+                "face": True,
+                "liveness": True,
+                "facial_similarity": False,
+                "live_document": False,
+                "docs": ["passport", "driving_licence", "national_id"],
+                "search_profile": "peps_sanctions_media_extended",
+            },
+            "check": TEST_CHECK_ID_2,
             "cost": 1,
             "completed_at": None,
         },
