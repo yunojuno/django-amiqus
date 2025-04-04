@@ -122,6 +122,7 @@ TEST_RECORD = {
     "archived_at": None,
 }
 # record returned by the v2 API
+# WRONG - THIS IS THE V1 RESPONSE
 TEST_RECORD_V2 = {
     "object": "record",
     "id": TEST_RECORD_ID,

@@ -72,6 +72,7 @@ class Check(BaseStatusModel):
         )
         PROOF_OF_ADDRESS = ("proof_of_address", "Proof of Address")
         RIGHT_TO_WORK = ("right_to_work", "Right to Work")
+        PHOTO_ID = ("check.photo_id", "Photo ID")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -93,10 +94,6 @@ class Check(BaseStatusModel):
         help_text=_(
             "The name of the check - see https://documentation.onfido.com/#checks"
         ),
-    )
-    amiqus_id = models.CharField(
-        max_length=32,
-        help_text=_("The ID of the check in the Amiqus API."),
     )
 
     objects = CheckQuerySet.as_manager()
