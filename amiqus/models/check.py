@@ -94,6 +94,10 @@ class Check(BaseStatusModel):
             "The name of the check - see https://documentation.onfido.com/#checks"
         ),
     )
+    amiqus_id = models.CharField(
+        max_length=32,
+        help_text=_("The ID of the check in the Amiqus API."),
+    )
 
     objects = CheckQuerySet.as_manager()
 
@@ -116,10 +120,9 @@ class Check(BaseStatusModel):
         """
         super().parse(scrub_check_data(raw_json))
         self.check_type = self.raw["type"]
-        self.status = self.raw["status"]
-        # Once the V2 API has been implemented, this won't be necessary.
-        if isinstance(self.status, int):
-            self.status = self.deprecated_status_mapper(self.status)
+        self.amiqus_id = self.raw["check"]
+        # no status in the response
+        # self.status = self.raw["status"]
         return self
 
     def deprecated_status_mapper(self, status: int) -> CheckStatus | None:

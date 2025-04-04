@@ -48,26 +48,27 @@ def create_record(client: Client, check_names: Iterable, **kwargs: Any) -> Recor
 
     Returns a new Record object, and creates the child Check objects.
 
+    https://developers.amiqus.co/aqid/api-reference.html#tag/Records/operation/post-records
     """
+    # Checks to have structured like so 'check.photo_id'
+    # custom_forms? message?
     data = {
-        "client_id": client.amiqus_id,
-        "checks": check_names,
-        "reset_client_status": True,
-        "send_email": True,
-        "send_reminder": True,
+        "client": client.amiqus_id,
+        "steps": [{"type": check_name} for check_name in check_names],
+        "notification": "email",
+        "reminder": True,
     }
-    # merge in the additional kwargs
+
+    # Merge in the additional kwargs
     data.update(kwargs)
 
-    # V2 here, this isn't yet implemented. It will error with a 405 method not allowed.
-    # response = post("records", data=data)
-    # We need to use API v1 for this until they add this method to v2 :) :( :)
-    response = post("records", data=data, version=1)
+    response = post("records", data=data)
     record = Record.objects.create_record(client=client, raw=response)
 
     try:
-        for response_check in data["checks"]["data"]:
-            Check.objects.create_check(record=record, raw=response_check)
+        for step in data["steps"]:
+            if step.get("check"):
+                Check.objects.create_check(record=record, raw=step["check"])
     except KeyError:
         # No checks
         pass
