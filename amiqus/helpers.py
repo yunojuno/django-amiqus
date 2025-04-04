@@ -49,6 +49,7 @@ def create_record(client: Client, check_names: Iterable, **kwargs: Any) -> Recor
     Returns a new Record object, and creates the child Check objects.
 
     https://developers.amiqus.co/aqid/api-reference.html#tag/Records/operation/post-records
+
     """
     # Checks to have structured like so 'check.photo_id'
     # custom_forms? message?
