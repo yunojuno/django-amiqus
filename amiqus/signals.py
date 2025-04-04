@@ -6,6 +6,7 @@ Signals are fired when corresponding callbacks are received.
 See https://documentation.onfido.com/#webhooks
 
 """
+
 from django.dispatch import Signal
 
 # fired after the status of a check /record is updated

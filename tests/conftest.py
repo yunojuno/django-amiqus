@@ -1,4 +1,5 @@
 """Shared pytest fixtures and test data."""
+
 from __future__ import annotations
 
 import copy

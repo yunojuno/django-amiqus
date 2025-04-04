@@ -4,6 +4,7 @@ Basic wire operations with the API - GET/POST/PUT.
 This is a simple wrapper around requests.
 
 """
+
 from __future__ import annotations
 
 import logging
