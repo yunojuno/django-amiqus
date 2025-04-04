@@ -96,7 +96,7 @@ class Check(BaseStatusModel):
         max_length=50,
         choices=CheckType.choices,
         help_text=_(
-            "The name of the check - see https://documentation.onfido.com/#checks"
+            "The name of the check - see https://developers.amiqus.co/aqid/api-reference.html#tag/Records/operation/get-checks-id"
         ),
     )
 
