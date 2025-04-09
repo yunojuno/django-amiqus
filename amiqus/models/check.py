@@ -124,8 +124,6 @@ class Check(BaseStatusModel):
         super().parse(scrub_check_data(raw_json))
         self.check_type = self.raw["type"]
         self.amiqus_id = self.raw["check"]
-        # no status in the response
-        # self.status = self.raw["status"]
         return self
 
     def deprecated_status_mapper(self, status: int) -> CheckStatus | None:

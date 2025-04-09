@@ -37,6 +37,7 @@ def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
     Create a new Record (and child Steps).
 
     Args:
+        client: Client for whom the records are being made.
         steps: list of dicts, each of which is a step in the record. These
         should be structured according to the documentation linked below. Example:
         [
