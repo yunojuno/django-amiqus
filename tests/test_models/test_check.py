@@ -20,6 +20,7 @@ class TestRecordManager:
         assert record.amiqus_id == str(data["id"])
         assert record.status == data["status"]
         assert record.created_at == date_parse(data["created_at"])
+        assert record.raw == data
 
     def test_create_record_with_checks(self, user, client):
         """Test checks are created correctly from record creation."""

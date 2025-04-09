@@ -31,6 +31,7 @@ class RecordQuerySet(BaseQuerySet):
             status=raw["status"],
             created_at=date_parse(raw["created_at"]),
             perform_url=raw.get("perform_url"),
+            raw=raw,
         )
 
         # Now handle the checks/steps after record is saved
