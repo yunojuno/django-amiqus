@@ -77,6 +77,8 @@ class Check(BaseStatusModel):
             "check.watchlist.peps_sanctions_media_extended",
             "Watchlist (PEPs, Sanctions, Media, Extended)",
         )
+        # For testing
+        DUMMY = ("check.dummy", "Dummy")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

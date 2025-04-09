@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Any
 
 from django.conf import settings
 
@@ -32,40 +32,39 @@ def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
     return Client.objects.create_client(user, response)
 
 
-def create_record(client: Client, check_names: Iterable, **kwargs: Any) -> Record:
+def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
     """
-    Create a new Record (and child Checks).
+    Create a new Record (and child Steps).
 
     Args:
-        client: Client for whom the records are being made. check_names:
-        list of strings, each of which is a valid check type.
+        steps: list of dicts, each of which is a step in the record. These
+        should be structured according to the documentation linked below. Example:
+        [
+            {
+                "type": "check.dummy",
+                "preferences": {"report_type": "standard"}
+            }
+        ]
 
-    Kwargs:
-        any kwargs passed in are merged into the data dict sent to the
-        API. This enables support for additional record properties -
-        e.g. redirect_uri, tags, suppress_form_emails and any other that
-        may change over time. See
-
-    Returns a new Record object, and creates the child Check objects.
+    Returns a new Record object, and creates the child Steps.
 
     https://developers.amiqus.co/aqid/api-reference.html#tag/Records/operation/post-records
 
     """
-    # Checks to have structured like so 'check.photo_id'
-    # custom_forms? message?
+    # We can add a custom message to the link here if we like, with a "message"
+    # key in the data dict.
     data = {
         "client": client.amiqus_id,
-        "steps": [{"type": check_name} for check_name in check_names],
         "notification": "email",
         "reminder": True,
     }
 
-    # Merge in the additional kwargs
-    data.update(kwargs)
+    data["steps"] = steps
 
     response = post("records", data=data)
     record = Record.objects.create_record(client=client, raw=response)
 
+    # Tempted to remove try/except
     try:
         for step in data["steps"]:
             if step.get("check"):
