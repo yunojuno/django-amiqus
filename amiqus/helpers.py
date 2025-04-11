@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Union, Literal
 
 from django.conf import settings
 
@@ -32,7 +32,12 @@ def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
     return Client.objects.create_client(user, response)
 
 
-def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
+def create_record(
+    client: Client,
+    steps: list[dict[str, Any]],
+    notification: Union[Literal["email"], Literal[False]] = "email",
+    reminder: bool = True,
+) -> Record:
     """
     Create a new Record (and child Steps).
 
@@ -46,6 +51,8 @@ def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
                 "preferences": {"report_type": "standard"}
             }
         ]
+        notification: Either "email" or False to control notification behavior.
+        reminder: Whether to send a reminder email to the client.
 
     Returns a new Record object, and creates the child Steps.
 
@@ -56,8 +63,8 @@ def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
     # key in the data dict.
     data = {
         "client": client.amiqus_id,
-        "notification": "email",
-        "reminder": True,
+        "notification": notification,
+        "reminder": reminder,
     }
 
     data["steps"] = steps
