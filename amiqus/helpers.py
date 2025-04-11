@@ -65,12 +65,8 @@ def create_record(client: Client, steps: list[dict[str, Any]]) -> Record:
     response = post("records", data=data)
     record = Record.objects.create_record(client=client, raw=response)
 
-    # Tempted to remove try/except
-    try:
-        for step in data["steps"]:
-            if step.get("check"):
-                Check.objects.create_check(record=record, raw=step["check"])
-    except KeyError:
-        # No checks
-        pass
+    for step in data["steps"]:
+        if step.get("check"):
+            Check.objects.create_check(record=record, raw=step["check"])
+
     return record
