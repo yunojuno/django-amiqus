@@ -39,44 +39,25 @@ class Check(BaseStatusModel):
     base_href = "checks"
 
     class CheckType(models.TextChoices):
-        # https://documentation.onfido.com/#check-names-in-api
-        DOCUMENT = ("document", "Document")
-        DOCUMENT_WITH_ADDRESS_INFORMATION = (
-            "document_with_address_information",
-            "Document with Address Information",
-        )
-        DOCUMENT_WITH_DRIVING_LICENCE_INFORMATION = (
-            "document_with_driving_licence_information",
-            "Document with Driving Licence Information",
-        )
-        FACIAL_SIMILARITY_PHOTO = (
-            "facial_similarity_photo",
-            "Facial Similarity (photo)",
-        )
-        FACIAL_SIMILARITY_PHOTO_FULLY_AUTO = (
-            "facial_similarity_photo_fully_auto",
-            "Facial Similarity (auto)",
-        )
-        FACIAL_SIMILARITY_VIDEO = (
-            "facial_similarity_video",
-            "Facial Similarity (video)",
-        )
-        KNOWN_FACES = ("known_faces", "Known Faces")
-        IDENTITY_ENHANCED = ("identity_enhanced", "Identity (enhanced)")
-        WATCHLIST_ENHANCED = ("watchlist_enhanced", "Watchlist (enhanced)")
-        WATCHLIST_STANDARD = ("watchlist_standard", "Watchlist")
-        WATCHLIST_PEPS_ONLY = ("watchlist_peps_only", "Watchlist (PEPs only)")
-        WATCHLIST_SANCTIONS_ONLY = (
-            "watchlist_sanctions_only",
-            "Watchlist (sanctions only)",
-        )
-        PROOF_OF_ADDRESS = ("proof_of_address", "Proof of Address")
-        RIGHT_TO_WORK = ("right_to_work", "Right to Work")
+        """
+        Represent the various types of Check that Amiqus supports.
+
+        Note that some of these require various preferences to be set.
+        See the steps array in the create record documentation:
+        https://developers.amiqus.co/aqid/api-reference.html#tag/Records/operation/post-records
+        """
+
+        CREDIT_REPORT = ("check.credit", "Credit Report")
+        CRIMINAL_RECORD = ("check.criminal_record", "Criminal Record")
+        IDENTITY_REPORT = ("check.identity", "Identity Report")
         PHOTO_ID = ("check.photo_id", "Photo ID")
-        WATCHLIST_PEPS_SANCTIONS_MEDIA_EXTENDED = (
-            "check.watchlist.peps_sanctions_media_extended",
-            "Watchlist (PEPs, Sanctions, Media, Extended)",
+        EMPLOYMENT_REFERENCING = (
+            "check.employment_referencing",
+            "Employment Referencing",
         )
+        EMPLOYMENT_HISTORY = ("check.reference", "Employment History")
+        FACE_CAPTURE = ("check.video", "Face Capture")
+        WATCHLIST = ("check.watchlist", "Watchlist")
         # For testing
         DUMMY = ("check.dummy", "Dummy")
 
@@ -125,21 +106,3 @@ class Check(BaseStatusModel):
         self.check_type = self.raw["type"]
         self.amiqus_id = self.raw["check"]
         return self
-
-    def deprecated_status_mapper(self, status: int) -> CheckStatus | None:
-        """
-        Return a v2 status for a v1 endpoint.
-
-        V1 endpoint returns an integer based status value.
-        V2 endpoint returns and uses a text based status value.
-        This function patches the two.
-        """
-        return {
-            0: self.CheckStatus.PENDING.value,  # type: ignore[attr-defined]
-            1: self.CheckStatus.SUBMITTED.value,  # type: ignore[attr-defined]
-            2: self.CheckStatus.ACCEPTED.value,  # type: ignore[attr-defined]
-            3: self.CheckStatus.REJECTED.value,  # type: ignore[attr-defined]
-            4: self.CheckStatus.REFER.value,  # type: ignore[attr-defined]
-            5: self.CheckStatus.FAILED.value,  # type: ignore[attr-defined]
-            6: self.CheckStatus.PAUSED.value,  # type: ignore[attr-defined]
-        }[status]
