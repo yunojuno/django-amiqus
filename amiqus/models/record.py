@@ -40,17 +40,10 @@ class RecordQuerySet(BaseQuerySet):
         for step in raw.get("steps", []):
             if step.get("check"):
                 # Use get_or_create but with the saved record
-                if step["type"] == "check.watchlist":
-                    if step["preferences"].get("search_profile"):
-                        check_type = (
-                            "check.watchlist." + step["preferences"]["search_profile"]
-                        )
-                else:
-                    check_type = step["type"]
                 Check.objects.get_or_create(
                     amiqus_id=step["check"],
                     amiqus_record=record,
-                    check_type=check_type,
+                    check_type=step["type"],
                     defaults={
                         "user": record.user,
                     },
