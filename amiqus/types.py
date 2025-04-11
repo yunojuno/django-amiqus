@@ -1,4 +1,5 @@
 """Custom types for type hinting."""
+
 from __future__ import annotations
 
 from typing import TypeAlias

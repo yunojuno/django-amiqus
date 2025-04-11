@@ -5,6 +5,7 @@ The Amiqus API will send a webhook to the configured URL when an event
 occurs, which we then use to update the relevant object.
 
 """
+
 from __future__ import annotations
 
 import json

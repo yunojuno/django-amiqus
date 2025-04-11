@@ -1,4 +1,5 @@
 """Shared pytest fixtures and test data."""
+
 from __future__ import annotations
 
 import copy
@@ -11,6 +12,7 @@ from amiqus.models import Client, Record
 TEST_CLIENT_ID = 123456
 TEST_RECORD_ID = 789012
 TEST_CHECK_ID = 3456789
+TEST_CHECK_ID_2 = 9876543
 TEST_DOCUMENT_ID = 9876543
 
 User = get_user_model()
@@ -106,6 +108,23 @@ TEST_RECORD = {
         {
             "object": "step",
             "id": 3,
+            "type": "check.watchlist",
+            "preferences": {
+                "report_type": "standard",
+                "face": True,
+                "liveness": True,
+                "facial_similarity": False,
+                "live_document": False,
+                "docs": ["passport", "driving_licence", "national_id"],
+                "search_profile": "peps_sanctions_media_extended",
+            },
+            "check": TEST_CHECK_ID_2,
+            "cost": 1,
+            "completed_at": None,
+        },
+        {
+            "object": "step",
+            "id": 3,
             "type": "document.request",
             "preferences": {
                 "title": "Utility bill",
@@ -122,6 +141,7 @@ TEST_RECORD = {
     "archived_at": None,
 }
 # record returned by the v2 API
+# WRONG - THIS IS THE V1 RESPONSE
 TEST_RECORD_V2 = {
     "object": "record",
     "id": TEST_RECORD_ID,

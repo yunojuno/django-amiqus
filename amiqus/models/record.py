@@ -22,7 +22,34 @@ class RecordQuerySet(BaseQuerySet):
     def create_record(self, client: Client, raw: dict) -> Record:
         """Create a new Record object from the raw JSON."""
         logger.debug("Creating new Amiqus record from JSON: %s", raw)
-        return Record(user=client.user, client=client).parse(raw).save()
+
+        # First create and save the base record with required relations
+        record = Record.objects.create(
+            user=client.user,
+            client=client,
+            amiqus_id=raw["id"],
+            status=raw["status"],
+            created_at=date_parse(raw["created_at"]),
+            perform_url=raw.get("perform_url"),
+            raw=raw,
+        )
+
+        # Now handle the checks/steps after record is saved
+        from .check import Check
+
+        for step in raw.get("steps", []):
+            if step.get("check"):
+                # Use get_or_create but with the saved record
+                Check.objects.get_or_create(
+                    amiqus_id=step["check"],
+                    amiqus_record=record,
+                    check_type=step["type"],
+                    defaults={
+                        "user": record.user,
+                    },
+                )
+
+        return record
 
 
 class Record(BaseStatusModel):
@@ -88,59 +115,3 @@ class Record(BaseStatusModel):
         return (
             f"<Record amiqus_id={self.amiqus_id} id={self.id} user_id={self.user_id}>"
         )
-
-    def parse(self, raw_json: dict) -> Record:
-        """Parse the raw value out into other properties."""
-        self.raw = raw_json
-        self.amiqus_id = self.raw["id"]
-        self.status = self.raw["status"]
-        if isinstance(self.status, int):
-            self.status = self.deprecated_status_mapper(self.status)
-        self.created_at = date_parse(self.raw["created_at"])
-        try:
-            self.perform_url = self.raw["links"]["perform"]
-        except KeyError:
-            # There's no url to perform as part of this request.
-            pass
-        try:
-            from .check import Check
-
-            # Loop through all checks in the response, and update our downstream models.
-            for response_check in self.raw["checks"]["data"]:
-                check, _ = Check.objects.get_or_create(
-                    amiqus_id=response_check["id"],
-                    user=self.user,
-                    check_type=response_check["type"],
-                    amiqus_record=self,
-                )
-                check.parse(response_check)
-                # Strictly speaking we shouldn't do this here.
-                # There's currently no API endpoint to fire a sequential update.
-                # So we pick the fields from the record fetch.
-                check.save()
-        except KeyError:
-            # We have no checks
-            pass
-        return self
-
-    def deprecated_status_mapper(self, status: int) -> RecordStatus | None:
-        """
-        Return a v2 status for a v1 endpoint.
-
-        V1 endpoint returns an integer based status value. V2 endpoint
-        returns and uses a text based status value. This function
-        patches the two.
-
-        """
-        CHECK_STATUS_MAP = {
-            0: self.RecordStatus.PENDING.value,  # type: ignore[attr-defined]
-            1: self.RecordStatus.STARTED.value,  # type: ignore[attr-defined]
-            2: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
-            3: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
-            4: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
-            5: self.RecordStatus.FAILED.value,  # type: ignore[attr-defined]
-            6: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
-            7: self.RecordStatus.UNKNOWN.value,  # type: ignore[attr-defined]
-            8: self.RecordStatus.REVIEWED.value,  # type: ignore[attr-defined]
-        }
-        return CHECK_STATUS_MAP[status]
