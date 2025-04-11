@@ -199,7 +199,11 @@ class BaseStatusModel(BaseModel):
         return self
 
     def parse(self, raw_json: dict) -> BaseStatusModel:
-        """Parse the raw value out into other properties."""
+        """Parse the raw value out into other properties.
+
+        Status models should eventually get a status, but default to None as sometimes,
+        such as when they are initially returned from the API, they don't have a status.
+        """
         super().parse(raw_json)
         self.status = self.raw.get("status", None)
         return self
