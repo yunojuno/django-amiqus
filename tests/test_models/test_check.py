@@ -39,9 +39,7 @@ class TestRecordManager:
         assert photo_check.amiqus_record == record
 
         # Verify second check
-        doc_check = checks.get(
-            check_type="check.watchlist.peps_sanctions_media_extended"
-        )
+        doc_check = checks.get(check_type="check.watchlist")
         assert doc_check.amiqus_id == str(TEST_CHECK_ID_2)
         assert doc_check.user == user
         assert doc_check.amiqus_record == record
