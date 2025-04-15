@@ -18,7 +18,7 @@ class CheckQuerySet(BaseQuerySet):
 
     def create_check(self, record: Record, raw: dict) -> Check:
         """Create a new Check from the raw JSON."""
-        logger.debug("Creating new Onfido check from JSON: %s", raw)
+        logger.debug("Creating new Amiqus check from JSON: %s", raw)
         return Check(user=record.user, amiqus_record=record).parse(raw).save()
 
 
