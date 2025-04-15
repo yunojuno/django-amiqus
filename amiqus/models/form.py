@@ -23,10 +23,6 @@ class FormQuerySet(BaseQuerySet):
 class Form(BaseModel):
     """Specific Forms associated with a Record."""
 
-    reference = models.CharField(max_length=255, unique=True, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
     record = models.ForeignKey(Record, on_delete=models.CASCADE)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

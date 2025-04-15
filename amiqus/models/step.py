@@ -22,7 +22,8 @@ class Step(BaseModel):
     """
     A step in a record.
 
-    These can be of type Check or Form and should be associated with a Review.
+    These can be of type Check or Form and should be associated with one or more
+    Reviews once they have been completed.
     """
 
     amiqus_check = models.OneToOneField(
@@ -31,7 +32,7 @@ class Step(BaseModel):
     form = models.OneToOneField(
         Form, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
-    review = models.OneToOneField(
+    review = models.ForeignKey(
         Review, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
 

@@ -62,9 +62,7 @@ class RecordQuerySet(BaseQuerySet):
                     record=record,
                     defaults={"user": record.user},
                 )[0]
-                Step.objects.create(
-                    amiqus_id=step_data["id"], amiqus_form=form, raw=step_data
-                )
+                Step.objects.create(amiqus_id=step_data["id"], form=form, raw=step_data)
 
 
 class Record(BaseStatusModel):
