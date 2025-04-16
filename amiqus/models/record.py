@@ -47,7 +47,7 @@ class RecordQuerySet(BaseQuerySet):
 
         for step_data in raw.get("steps", []):
             if "check" in step_data.get("type"):
-                check = Check.objects.get_or_create(
+                check = Check.objects.create(
                     amiqus_id=step_data["check"],
                     amiqus_record=record,
                     check_type=step_data["type"],
@@ -57,7 +57,7 @@ class RecordQuerySet(BaseQuerySet):
                     amiqus_id=step_data["check"], amiqus_check=check, raw=step_data
                 )
             elif "form" in step_data.get("type"):
-                form = Form.objects.get_or_create(
+                form = Form.objects.create(
                     amiqus_id=step_data["form"],
                     record=record,
                     defaults={"user": record.user},

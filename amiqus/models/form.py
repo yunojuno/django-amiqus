@@ -34,3 +34,9 @@ class Form(BaseModel):
     )
 
     objects = FormQuerySet.as_manager()
+
+    def __str__(self) -> str:
+        return f"Form {self.amiqus_id} for {self.user}"
+
+    def __repr__(self) -> str:
+        return f"<Form id={self.id} amiqus_id={self.amiqus_id}>"
