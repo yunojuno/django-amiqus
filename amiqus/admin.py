@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .models import Check, Client, Event, Record
+from .models import Check, Client, Event, Record, Step, Form, Review
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
@@ -187,3 +187,62 @@ class EventAdmin(RawMixin, UserMixin, admin.ModelAdmin):
 
 
 admin.site.register(Event, EventAdmin)
+
+
+class StepAdmin(RawMixin, admin.ModelAdmin):
+    """Admin model for Step objects."""
+
+    list_display = (
+        "id",
+        "record",
+        "amiqus_check",
+        "form",
+    )
+    readonly_fields = (
+        "id",
+        "record",
+        "amiqus_check",
+        "form",
+        # "reviews",
+    )
+    search_fields = ("id",)
+    raw_id_fields = ("record", "amiqus_check", "form")
+
+
+class FormAdmin(RawMixin, admin.ModelAdmin):
+    """Admin model for Form objects."""
+
+    list_display = (
+        "amiqus_id",
+        "created_at",
+    )
+    list_filter = ("created_at",)
+    readonly_fields = (
+        "amiqus_id",
+        "created_at",
+        "_raw",
+    )
+    search_fields = ("amiqus_id",)
+    exclude = ("raw",)
+
+
+class ReviewAdmin(RawMixin, admin.ModelAdmin):
+    """Admin model for Review objects."""
+
+    list_display = (
+        "amiqus_id",
+        "created_at",
+    )
+    list_filter = ("created_at",)
+    readonly_fields = (
+        "amiqus_id",
+        "created_at",
+        "_raw",
+    )
+    search_fields = ("amiqus_id",)
+    exclude = ("raw",)
+
+
+admin.site.register(Step, StepAdmin)
+admin.site.register(Form, FormAdmin)
+admin.site.register(Review, ReviewAdmin)

@@ -20,10 +20,10 @@ class RecordQuerySet(BaseQuerySet):
     """Record model manager."""
 
     def create_record(self, client: Client, raw: dict) -> Record:
-        """Create a new Record object from the raw JSON."""
+        """Create a new Record object and its related objects from the API response."""
         logger.debug("Creating new Amiqus record from JSON: %s", raw)
 
-        # First create and save the base record with required relations
+        # Create the base record
         record = Record.objects.create(
             user=client.user,
             client=client,
@@ -34,22 +34,39 @@ class RecordQuerySet(BaseQuerySet):
             raw=raw,
         )
 
-        # Now handle the checks/steps after record is saved
-        from .check import Check
-
-        for step in raw.get("steps", []):
-            if step.get("check"):
-                # Use get_or_create but with the saved record
-                Check.objects.get_or_create(
-                    amiqus_id=step["check"],
-                    amiqus_record=record,
-                    check_type=step["type"],
-                    defaults={
-                        "user": record.user,
-                    },
-                )
+        # Create all related objects
+        self._create_steps_from_response(record, raw)
 
         return record
+
+    def _create_steps_from_response(self, record: Record, raw: dict) -> None:
+        """Create Steps and their related Check/Form objects from API response."""
+        from .check import Check
+        from .form import Form
+        from .step import Step
+
+        for step_data in raw.get("steps", []):
+            if "check" in step_data.get("type"):
+                check = Check.objects.create(
+                    amiqus_id=step_data["check"],
+                    amiqus_record=record,
+                    check_type=step_data["type"],
+                    user=record.user,
+                )
+                Step.objects.create(
+                    amiqus_check=check,
+                    record=record,
+                )
+            elif "form" in step_data.get("type"):
+                form = Form.objects.create(
+                    amiqus_id=step_data["form"],
+                    record=record,
+                    user=record.user,
+                )
+                Step.objects.create(
+                    form=form,
+                    record=record,
+                )
 
 
 class Record(BaseStatusModel):

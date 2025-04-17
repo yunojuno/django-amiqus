@@ -5,7 +5,7 @@ from typing import Any, Union, Literal
 from django.conf import settings
 
 from .api import post
-from .models import Check, Client, Record
+from .models import Client, Record
 
 
 def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
@@ -65,15 +65,8 @@ def create_record(
         "client": client.amiqus_id,
         "notification": notification,
         "reminder": reminder,
+        "steps": steps,
     }
 
-    data["steps"] = steps
-
     response = post("records", data=data)
-    record = Record.objects.create_record(client=client, raw=response)
-
-    for step in data["steps"]:
-        if step.get("check"):
-            Check.objects.create_check(record=record, raw=step["check"])
-
-    return record
+    return Record.objects.create_record(client=client, raw=response)
