@@ -197,18 +197,16 @@ class StepAdmin(RawMixin, admin.ModelAdmin):
         "record",
         "amiqus_check",
         "form",
-        "review",
     )
     readonly_fields = (
         "id",
         "record",
         "amiqus_check",
         "form",
-        "review",
-        "_raw",
+        # "reviews",
     )
     search_fields = ("id",)
-    raw_id_fields = ("record", "amiqus_check", "form", "review")
+    raw_id_fields = ("record", "amiqus_check", "form")
 
 
 class FormAdmin(RawMixin, admin.ModelAdmin):

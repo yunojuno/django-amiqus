@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .base import BaseModel
+from .step import Step
 
 
 class Review(BaseModel):
@@ -19,3 +20,4 @@ class Review(BaseModel):
         help_text=_("The current status of the review (from API)."),
         choices=ReviewStatus.choices,
     )
+    step = models.ForeignKey(Step, on_delete=models.CASCADE, related_name="reviews")

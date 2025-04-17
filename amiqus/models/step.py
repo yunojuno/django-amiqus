@@ -4,7 +4,6 @@ from django.db import models
 
 from .check import Check
 from .form import Form
-from .review import Review
 from .record import Record
 
 
@@ -24,7 +23,4 @@ class Step(models.Model):
     )
     form = models.OneToOneField(
         Form, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
-    )
-    review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
