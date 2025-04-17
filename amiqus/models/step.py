@@ -1,24 +1,14 @@
 from __future__ import annotations
-import logging
 
 from django.db import models
 
-from .base import BaseModel, BaseQuerySet
 from .check import Check
 from .form import Form
 from .review import Review
-
-logger = logging.getLogger(__name__)
-
-
-class StepQuerySet(BaseQuerySet):
-    def create_step(self, check: Check, raw: dict) -> Step:
-        """Create a new Step from the raw JSON."""
-        logger.debug("Creating new Amiqus step from JSON: %s", raw)
-        return Step(amiqus_check=check).parse(raw).save()
+from .record import Record
 
 
-class Step(BaseModel):
+class Step(models.Model):
     """
     A step in a record.
 
@@ -26,6 +16,9 @@ class Step(BaseModel):
     Reviews once they have been completed.
     """
 
+    id = models.AutoField(primary_key=True)
+
+    record = models.ForeignKey(Record, on_delete=models.CASCADE, related_name="steps")
     amiqus_check = models.OneToOneField(
         Check, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
@@ -35,5 +28,3 @@ class Step(BaseModel):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
-
-    objects = StepQuerySet.as_manager()

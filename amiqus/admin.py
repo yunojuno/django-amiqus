@@ -193,21 +193,22 @@ class StepAdmin(RawMixin, admin.ModelAdmin):
     """Admin model for Step objects."""
 
     list_display = (
-        "amiqus_id",
+        "id",
+        "record",
         "amiqus_check",
         "form",
         "review",
-        "created_at",
     )
-    list_filter = ("created_at",)
     readonly_fields = (
-        "amiqus_id",
-        "created_at",
+        "id",
+        "record",
+        "amiqus_check",
+        "form",
+        "review",
         "_raw",
     )
-    search_fields = ("amiqus_id",)
-    raw_id_fields = ("amiqus_check", "form", "review")
-    exclude = ("raw",)
+    search_fields = ("id",)
+    raw_id_fields = ("record", "amiqus_check", "form", "review")
 
 
 class FormAdmin(RawMixin, admin.ModelAdmin):

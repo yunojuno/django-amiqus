@@ -54,7 +54,8 @@ class RecordQuerySet(BaseQuerySet):
                     user=record.user,
                 )
                 Step.objects.create(
-                    amiqus_id=step_data["check"], amiqus_check=check, raw=step_data
+                    amiqus_check=check,
+                    record=record,
                 )
             elif "form" in step_data.get("type"):
                 form = Form.objects.create(
@@ -62,7 +63,10 @@ class RecordQuerySet(BaseQuerySet):
                     record=record,
                     user=record.user,
                 )
-                Step.objects.create(amiqus_id=step_data["id"], form=form, raw=step_data)
+                Step.objects.create(
+                    form=form,
+                    record=record,
+                )
 
 
 class Record(BaseStatusModel):

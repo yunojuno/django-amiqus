@@ -1,7 +1,7 @@
 import copy
 import pytest
 from amiqus.models import Record, Step, Check, Form
-from ..conftest import TEST_RECORD, TEST_RECORD_ID, TEST_CHECK_ID, TEST_CHECK_ID_2
+from ..conftest import TEST_RECORD, TEST_RECORD_ID
 
 
 @pytest.mark.django_db
@@ -19,14 +19,12 @@ class TestStepCreation:
 
         # Check first step (photo_id)
         photo_step = Step.objects.get(amiqus_check__check_type="check.photo_id")
-        assert photo_step.amiqus_id == str(TEST_CHECK_ID)
         assert photo_step.amiqus_check.user == user
         assert photo_step.form is None
         assert photo_step.review is None
 
         # Check second step (watchlist)
         watchlist_step = Step.objects.get(amiqus_check__check_type="check.watchlist")
-        assert watchlist_step.amiqus_id == str(TEST_CHECK_ID_2)
         assert watchlist_step.amiqus_check.user == user
         assert watchlist_step.form is None
         assert watchlist_step.review is None
@@ -56,11 +54,8 @@ class TestStepCreation:
 
         # Check the step was created and linked to the form
         step = Step.objects.get(form=form)
-        assert step.amiqus_id == "3"
         assert step.amiqus_check is None
         assert step.review is None
-        assert step.raw["type"] == "form"
-        assert step.raw["form"] == "a66185ca-144c-43fe-9048-1ab74add82b4"
 
     def test_create_record_no_steps(self, user, client):
         """Test record creation with no steps."""
