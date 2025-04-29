@@ -54,6 +54,7 @@ class RecordQuerySet(BaseQuerySet):
                     user=record.user,
                 )
                 Step.objects.create(
+                    amiqus_id=step_data["id"],
                     amiqus_check=check,
                     record=record,
                 )
@@ -64,6 +65,7 @@ class RecordQuerySet(BaseQuerySet):
                     user=record.user,
                 )
                 Step.objects.create(
+                    amiqus_id=step_data["id"],
                     form=form,
                     record=record,
                 )

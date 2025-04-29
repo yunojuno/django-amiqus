@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from django.db import models
-
+from django.utils.translation import gettext_lazy as _
 from .check import Check
 from .form import Form
 from .record import Record
@@ -16,6 +16,16 @@ class Step(models.Model):
     """
 
     id = models.AutoField(primary_key=True)
+
+    amiqus_id = models.CharField(
+        "Amiqus ID",
+        max_length=40,
+        help_text=_(
+            "The id returned from the Amiqus API. These should be unique on "
+            "the record."
+        ),
+        null=True,
+    )
 
     record = models.ForeignKey(Record, on_delete=models.CASCADE, related_name="steps")
     amiqus_check = models.OneToOneField(

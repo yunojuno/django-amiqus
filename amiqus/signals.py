@@ -20,3 +20,6 @@ on_status_change = Signal()
 # signal that results in completion, we have a dedicated signal.
 # providing_args=["instance", "completed_at"]
 on_completion = Signal()
+
+# Signal that will be sent when a record is reviewed
+record_reviewed = Signal()

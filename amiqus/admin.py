@@ -232,13 +232,10 @@ class ReviewAdmin(RawMixin, admin.ModelAdmin):
     list_display = (
         "amiqus_id",
         "created_at",
+        "status",
     )
-    list_filter = ("created_at",)
-    readonly_fields = (
-        "amiqus_id",
-        "created_at",
-        "_raw",
-    )
+    list_filter = ("created_at", "status")
+    readonly_fields = ("amiqus_id", "created_at", "_raw")
     search_fields = ("amiqus_id",)
     exclude = ("raw",)
 
