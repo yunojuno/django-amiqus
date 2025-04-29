@@ -15,7 +15,7 @@ class TestStepCreation:
 
         # We should have two steps from TEST_RECORD
         steps = Step.objects.all()
-        assert steps.count() == 2
+        assert steps.count() == 3
 
         # Check first step (photo_id)
         photo_step = Step.objects.get(amiqus_check__check_type="check.photo_id")

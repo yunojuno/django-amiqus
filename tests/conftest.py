@@ -124,14 +124,15 @@ TEST_RECORD = {
         },
         {
             "object": "step",
-            "id": 3,
-            "type": "document.request",
+            "id": 4,
+            "type": "check.criminal_record",
             "preferences": {
-                "title": "Utility bill",
-                "instructions": "A utility bill dated within the last three months.",
+                "report_type": "standard",
+                "country": "gb",
+                "check_type": "basic",
             },
-            "document": 23123,
-            "cost": 0,
+            "check": TEST_CHECK_ID_2 + 1,
+            "cost": 1,
             "completed_at": None,
         },
     ],
@@ -295,3 +296,32 @@ TEST_EVENT_RECORD_FINISHED: dict = {
         },
     },
 }
+
+TEST_EVENT_RECORD_REVIEWED: dict = {
+    "webhook": {
+        "uuid": "93554561-d946-4c0d-8858-28f038801b47",
+        "created_at": "2023-03-31T22:54:32+00:00",
+        "events": ["*"],
+    },
+    "trigger": {
+        "triggered_at": "2023-04-06T15:17:50+00:00",
+        "alias": "record.reviewed",
+    },
+    "data": {
+        "record": {
+            "id": TEST_RECORD_ID,
+            "show": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}",
+            "download": f"https://id.amiqus.co/api/records/{TEST_RECORD_ID}/download",
+        },
+        "client": {
+            "id": TEST_CLIENT_ID,
+            "show": f"https://id.amiqus.co/api/clients/{TEST_CLIENT_ID}",
+        },
+    },
+}
+
+
+@pytest.fixture
+def record_reviewed_event():
+    """Return a record.reviewed event fixture."""
+    return copy.deepcopy(TEST_EVENT_RECORD_REVIEWED)
