@@ -8,7 +8,7 @@ import pytest
 from amiqus.models import Review, Record, Event
 from amiqus.views import status_update
 from amiqus.signals import record_reviewed
-from amiqus.helpers import create_reviews
+from amiqus.helpers import create_or_update_reviews
 
 
 @pytest.mark.django_db
@@ -38,7 +38,7 @@ class TestRecordReviewedWebhook:
         record_reviewed.connect(signal_handler)
 
         # Mock create_reviews to prevent API calls
-        with mock.patch("amiqus.views.create_reviews"):
+        with mock.patch("amiqus.views.create_or_update_reviews"):
             request = rf.post(
                 "/",
                 data=json.dumps(record_reviewed_event),
@@ -91,7 +91,7 @@ class TestRecordReviewedWebhook:
         )
 
         # Call create_reviews
-        create_reviews(event)
+        create_or_update_reviews(event)
 
         # Verify API was called for each step
         assert mock_get.call_count == len(steps)

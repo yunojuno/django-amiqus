@@ -19,7 +19,7 @@ from .decorators import verify_signature
 from .models import Client, Event, Record
 from .settings import LOG_EVENTS
 from .signals import record_reviewed
-from .helpers import create_reviews
+from .helpers import create_or_update_reviews
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
             record_reviewed.send(
                 sender=resource.__class__, record=resource, event=event, data=data
             )
-            create_reviews(event)
+            create_or_update_reviews(event)
 
         if LOG_EVENTS:
             event.save()

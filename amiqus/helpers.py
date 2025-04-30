@@ -72,7 +72,7 @@ def create_record(
     return Record.objects.create_record(client=client, raw=response)
 
 
-def create_reviews(
+def create_or_update_reviews(
     event: Event,
 ) -> None:
     """Create or update reviews for each step in a record."""
