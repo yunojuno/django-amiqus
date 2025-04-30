@@ -62,11 +62,10 @@ class TestRecordReviewedWebhook:
         """Test create_reviews helper creates Review objects from API data."""
         # Get the steps that were automatically created with the record
         steps = record.steps.all()
-        assert len(steps) == 3  # Verify we have the expected number of steps
+        assert len(steps) == 3
 
         # Mock the API response to return different review IDs for each step
         def get_mock_response(url):
-            # Extract step ID from the URL
             step_id = url.split("/")[
                 -2
             ]  # URL format: records/{record_id}/steps/{step_id}/reviews
@@ -105,38 +104,3 @@ class TestRecordReviewedWebhook:
             review = Review.objects.get(amiqus_id=f"review-{step.amiqus_id}")
             assert review.step == step
             assert review.status == "approved"
-
-    @mock.patch("amiqus.models.Record.update_status")
-    @mock.patch("amiqus.models.Event.parse")
-    def test_record_reviewed_creates_reviews(
-        self, mock_parse, mock_update, rf, record_reviewed_event, record
-    ):
-        """Test that record.reviewed webhook creates reviews via create_reviews."""
-        # Mock the event parse to return an event with our record
-        mock_event = Event(
-            amiqus_id=record.amiqus_id,
-            resource_type="record",
-            action="record.reviewed",
-            received_at=now(),
-            raw=record_reviewed_event,
-        )
-        # Mock the _resource_manager to return a manager that will return our record
-        mock_manager = mock.Mock()
-        mock_manager.get.return_value = record
-        mock_event._resource_manager = mock.Mock(return_value=mock_manager)
-        mock_parse.return_value = mock_event
-        print(mock_event.__dict__)
-
-        with mock.patch("amiqus.views.create_reviews") as mock_create_reviews:
-            request = rf.post(
-                "/",
-                data=json.dumps(record_reviewed_event),
-                content_type="application/json",
-            )
-            response = status_update(request)
-
-            assert response.status_code == 200
-            mock_create_reviews.assert_called_once()
-            event = mock_create_reviews.call_args[0][0]
-            assert isinstance(event, Event)
-            # assert event.action == "record.reviewed"

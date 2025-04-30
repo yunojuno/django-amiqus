@@ -75,12 +75,19 @@ def create_record(
 def create_reviews(
     event: Event,
 ) -> None:
-    """Create reviews for each step in a record."""
+    """Create or update reviews for each step in a record."""
     record_id = event.raw["data"]["record"]["id"]
     record = Record.objects.get(amiqus_id=record_id)
     steps = record.steps.all()
+
     for step in steps:
         response = get(f"records/{record_id}/steps/{step.amiqus_id}/reviews")
         review_list = response["data"]
-        for review in review_list:
-            Review(step=step).parse(review).save()
+
+        for review_data in review_list:
+            try:
+                review = Review.objects.get(amiqus_id=review_data["id"])
+                if review.status != review_data["status"]:
+                    review.parse(review_data).save()
+            except Review.DoesNotExist:
+                Review(step=step).parse(review_data).save()

@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from .check import Check
 from .form import Form
 from .record import Record
+from .review import Review
 
 
 class Step(models.Model):
@@ -34,3 +35,13 @@ class Step(models.Model):
     form = models.OneToOneField(
         Form, on_delete=models.CASCADE, null=True, blank=True, related_name="step"
     )
+
+    def __str__(self) -> str:
+        return f"""Step number {self.id} on record {self.record.amiqus_id}
+            for {self.record.user.get_full_name()}
+            ({self.amiqus_check.check_type if self.amiqus_check else "form"})
+        """
+
+    def get_latest_review(self) -> Review | None:
+        """Return the latest review for the step."""
+        return self.reviews.order_by("-created_at").first()
