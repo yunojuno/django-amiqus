@@ -1,11 +1,14 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .review import Review
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .check import Check
 from .form import Form
 from .record import Record
-from .review import Review
 
 
 class Step(models.Model):
