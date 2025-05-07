@@ -40,10 +40,7 @@ class Step(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"""Step number {self.id} on record {self.record.amiqus_id}
-            for {self.record.user.get_full_name()}
-            ({self.amiqus_check.check_type if self.amiqus_check else "form"})
-        """
+        return f"Step number {self.amiqus_id} on record {self.record}"
 
     def get_latest_review(self) -> Review | None:
         """Return the latest review for the step."""
