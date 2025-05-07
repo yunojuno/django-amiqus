@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import logging
-from base64 import b64encode
+from base64 import b64decode
 from functools import wraps
 from typing import Any, Callable
 
@@ -26,11 +26,7 @@ def _hmac(token: bytes, text: bytes) -> bytes:
     Return the SHA1 HMAC as a string.
 
     """
-    # This simply doesn't work. TEST_MODE should remain on until a future date.
-    auth_code = hmac.new(token, text, hashlib.sha256).hexdigest()
-    base64_hmac = b64encode(auth_code.encode("utf-8"))
-    logger.debug("Amiqus callback request HMAC: %s", base64_hmac)
-    return base64_hmac
+    return hmac.new(token, text, hashlib.sha256).digest()
 
 
 def _match(token: bytes, request: HttpRequest) -> bool:
@@ -45,20 +41,10 @@ def _match(token: bytes, request: HttpRequest) -> bool:
     Returns True if there is a match.
 
     """
-    try:
-        signature = request.headers["X_AQID_SIGNATURE"]
-        logger.debug("Amiqus callback X-Signature: %s", signature)
-        logger.debug("Amiqus callback request body: %s", request.body)
-
-        return _hmac(token, request.body) == signature
-    except KeyError:
-        logger.warning(
-            "Amiqus callback missing X-Signature - this may be an unauthorised request."
-        )
-        return False
-    except Exception:  # noqa: B902
-        logger.exception("Error attempting to decode Amiqus signature.")
-        return False
+    signature_b64 = request.headers.get("x-aqid-signature")
+    expected_signature = _hmac(token, request.body)
+    received_signature = b64decode(signature_b64)
+    return hmac.compare_digest(received_signature, expected_signature)
 
 
 def verify_signature() -> Callable:
