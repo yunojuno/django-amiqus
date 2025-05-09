@@ -40,7 +40,7 @@ class Step(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"Step number {self.amiqus_id} on record {self.record}"
+        return f"Step number {self.amiqus_id} on record #{self.record_id}"
 
     def get_latest_review(self) -> Review | None:
         """Return the latest review for the step."""
