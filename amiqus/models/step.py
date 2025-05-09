@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .review import Review
+    pass
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -40,8 +40,4 @@ class Step(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"Step number {self.amiqus_id} on record {self.record}"
-
-    def get_latest_review(self) -> Review | None:
-        """Return the latest review for the step."""
-        return self.reviews.order_by("-created_at").first()
+        return f"Step number {self.amiqus_id} on record #{self.record_id}"
