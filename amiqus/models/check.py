@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+from dateutil.parser import parse as date_parse
 from ..settings import scrub_check_data
 from .base import BaseQuerySet, BaseStatusModel
 from .record import Record
@@ -103,6 +103,11 @@ class Check(BaseStatusModel):
 
         """
         super().parse(scrub_check_data(raw_json))
-        self.check_type = self.raw["type"]
-        self.amiqus_id = self.raw["check"]
+        self.check_type = (
+            self.raw["type"]
+            if self.raw["type"].startswith("check.")
+            else "check.{}".format(self.raw["type"])
+        )
+        self.amiqus_id = self.raw.get("check") or self.raw["id"]
+        self.updated_at = date_parse(self.raw.get("updated_at"))
         return self
