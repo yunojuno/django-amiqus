@@ -4,8 +4,8 @@ from typing import Any, Union, Literal
 
 from django.conf import settings
 
-from .api import post
-from .models import Client, Record
+from .api import post, get
+from .models import Client, Record, Review, Event
 
 
 def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
@@ -70,3 +70,24 @@ def create_record(
 
     response = post("records", data=data)
     return Record.objects.create_record(client=client, raw=response)
+
+
+def create_or_update_reviews(
+    event: Event,
+) -> None:
+    """Create or update reviews for each step in a record."""
+    record_id = event.raw["data"]["record"]["id"]
+    record = Record.objects.get(amiqus_id=record_id)
+    steps = record.steps.all()
+
+    for step in steps:
+        response = get(f"records/{record_id}/steps/{step.amiqus_id}/reviews")
+        review_list = response["data"]
+
+        for review_data in review_list:
+            try:
+                review = Review.objects.get(amiqus_id=review_data["id"])
+                if review.status != review_data["status"]:
+                    review.parse(review_data).save()
+            except Review.DoesNotExist:
+                Review(step=step).parse(review_data).save()

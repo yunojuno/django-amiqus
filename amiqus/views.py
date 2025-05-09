@@ -18,6 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .decorators import verify_signature
 from .models import Client, Event, Record
 from .settings import LOG_EVENTS
+from .signals import record_reviewed
+from .helpers import create_or_update_reviews
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +63,15 @@ def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
     try:
         resource = event.parse(data, entity_type=entity_type).resource
         resource.update_status(event)
+
+        # Send signal for record.reviewed events
+        if alias == "record.reviewed":
+            logger.debug("Sending record_reviewed signal for record %s", resource.id)
+            record_reviewed.send(
+                sender=resource.__class__, record=resource, event=event, data=data
+            )
+            create_or_update_reviews(event)
+
         if LOG_EVENTS:
             event.save()
         return HttpResponse("Update processed.")

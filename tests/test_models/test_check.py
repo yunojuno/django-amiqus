@@ -30,7 +30,7 @@ class TestRecordManager:
 
         # Verify checks were created
         checks = record.checks.all()
-        assert checks.count() == 2
+        assert checks.count() == 3
 
         # Verify first check
         photo_check = checks.get(check_type="check.photo_id")
@@ -53,6 +53,7 @@ class TestRecordManager:
             "steps": [
                 {
                     "type": "check.photo_id",
+                    "id": 2,
                     "check": "12345",
                     "preferences": {"report_type": "standard"},
                 }

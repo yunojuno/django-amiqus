@@ -192,6 +192,19 @@ admin.site.register(Event, EventAdmin)
 class StepAdmin(RawMixin, admin.ModelAdmin):
     """Admin model for Step objects."""
 
+    def reviews(self, obj: Step) -> str:
+        """Return a list of reviews for the step."""
+        reviews = obj.reviews.all()
+        if reviews.count() == 0:
+            return "No reviews"
+        html = "".join(
+            [
+                "<li>{}: {}</li>".format(review.created_at.date(), review.status)
+                for review in reviews
+            ]
+        )
+        return mark_safe("<ul>{}</ul>".format(html))  # noqa: S703, S308
+
     list_display = (
         "id",
         "record",
@@ -201,9 +214,10 @@ class StepAdmin(RawMixin, admin.ModelAdmin):
     readonly_fields = (
         "id",
         "record",
+        "amiqus_id",
         "amiqus_check",
         "form",
-        # "reviews",
+        "reviews",
     )
     search_fields = ("id",)
     raw_id_fields = ("record", "amiqus_check", "form")
@@ -232,13 +246,10 @@ class ReviewAdmin(RawMixin, admin.ModelAdmin):
     list_display = (
         "amiqus_id",
         "created_at",
+        "status",
     )
-    list_filter = ("created_at",)
-    readonly_fields = (
-        "amiqus_id",
-        "created_at",
-        "_raw",
-    )
+    list_filter = ("created_at", "status")
+    readonly_fields = ("status", "step", "amiqus_id", "created_at", "_raw")
     search_fields = ("amiqus_id",)
     exclude = ("raw",)
 
