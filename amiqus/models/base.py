@@ -60,7 +60,7 @@ class BaseModel(models.Model):
         self.status = self.raw.get("status")
 
         created_at = self.raw.get("created_at")
-        if isinstance(created_at, str):  # ensure we have a string
+        if created_at is not None:
             self.created_at = date_parse(created_at)
         else:
             self.created_at = None

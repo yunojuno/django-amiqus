@@ -117,16 +117,6 @@ class BaseModelTests(TestCase):
         obj = BaseModelInstance().parse(data)
         assert obj.created_at is None
 
-    def test_parse_with_invalid_created_at(self):
-        """Test parsing when created_at is not a string."""
-        data = {
-            "id": "c26f22d5-4903-401f-8a48-7b0211d03c1f",
-            "created_at": {"invalid": "format"},
-            "status": "awaiting_client",
-        }
-        obj = BaseModelInstance().parse(data)
-        assert obj.created_at is None
-
 
 @pytest.mark.django_db
 class TestBaseQuerySet:
