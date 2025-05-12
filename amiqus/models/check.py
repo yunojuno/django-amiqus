@@ -103,8 +103,9 @@ class Check(BaseStatusModel):
 
         """
         super().parse(scrub_check_data(raw_json))
-
-        # Ensure that the check type conforms to our naming strategy
+        # Ensure that the check type conforms to Check.CheckType.
+        # On Record/Check creation, the type will have the check.
+        # prefix. But when pulling check data, there is no prefix.
         self.check_type = (
             self.raw["type"]
             if self.raw["type"].startswith("check.")
