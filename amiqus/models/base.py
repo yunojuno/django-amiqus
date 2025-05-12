@@ -57,8 +57,13 @@ class BaseModel(models.Model):
         """Parse the raw value out into other properties."""
         self.raw = raw_json
         self.amiqus_id = self.raw["id"]
-        self.status = self.raw.get("status", None)
-        self.created_at = date_parse(self.raw.get("created_at", None))
+        self.status = self.raw.get("status")
+
+        created_at = self.raw.get("created_at")
+        if created_at is not None:
+            self.created_at = date_parse(created_at)
+        else:
+            self.created_at = None
 
         return self
 
