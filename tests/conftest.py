@@ -175,16 +175,16 @@ TEST_RECORD_V2 = {
     "archived_at": None,
 }
 
-TEST_CHECK_DOCUMENT = {
+TEST_CHECK_PHOTO_ID = {
     "allow_cancel": False,
     "allow_replay": False,
     "created_at": "2023-04-06T11:37:14Z",
-    "id": TEST_CHECK_ID,
+    "id": 123456,
     "object": "check",
-    "record": TEST_CLIENT_ID,
+    "record": TEST_RECORD_ID,
     "requires_consent": True,
     "status": "pending",
-    "type": "document",
+    "type": "photo_id",
     "updated_at": "2023-04-06T11:37:14Z",
 }
 
