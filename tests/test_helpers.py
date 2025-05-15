@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 from dateutil.parser import parse as date_parse
 
-from amiqus.helpers import create_client
+from amiqus.helpers import create_client, update_client_status
+from amiqus.models import Client
 
 
 class TestCreateRecord:
@@ -56,3 +57,18 @@ class TestCreateClient:
                 "email": user.email,
             },
         )
+
+
+@pytest.mark.django_db
+class TestUpdateClientStatus:
+    @mock.patch("amiqus.helpers.patch")
+    def test_update_client_status(self, mock_patch, client_data, client):
+        """Test the update_client_status function."""
+        mock_patch.return_value = client_data
+        update_client_status(client, Client.ClientStatus.FOR_REVIEW)
+        mock_patch.assert_called_once_with(
+            f"clients/{client.amiqus_id}",
+            data={"status": Client.ClientStatus.FOR_REVIEW.value},
+        )
+        assert client.amiqus_id == str(client_data["id"])
+        assert client.created_at == date_parse(client_data["created_at"])
