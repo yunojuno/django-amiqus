@@ -83,3 +83,16 @@ def post(href: str, *, data: dict, version: int = 2) -> dict:
             timeout=DEFAULT_REQUESTS_TIMEOUT,
         )
     )
+
+
+def patch(href: str, *, data: dict, version: int = 2) -> dict:
+    """Make a PATCH request and return the response as JSON."""
+    logger.debug("Amiqus API PATCH request: %s", href)
+    return _respond(
+        requests.patch(
+            _url(href, version),
+            headers=_headers(),
+            json=data,
+            timeout=DEFAULT_REQUESTS_TIMEOUT,
+        )
+    )

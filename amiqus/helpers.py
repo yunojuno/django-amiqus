@@ -4,7 +4,7 @@ from typing import Any, Union, Literal
 
 from django.conf import settings
 
-from .api import post, get
+from .api import post, get, patch
 from .models import Client, Record, Review, Event
 
 
@@ -91,3 +91,11 @@ def create_or_update_reviews(
                     review.parse(review_data).save()
             except Review.DoesNotExist:
                 Review(step=step).parse(review_data).save()
+
+
+def update_client_status(client: Client, client_status: Client.ClientStatus) -> None:
+    """Update the status of a client."""
+    response = patch(
+        f"clients/{client.amiqus_id}", data={"status": client_status.value}
+    )
+    client.parse(response).save()
