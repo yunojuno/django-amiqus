@@ -67,10 +67,10 @@ def status_update(request: HttpRequest) -> HttpResponse:  # noqa: C901
         # Send signal for record.reviewed events
         if alias == "record.reviewed":
             logger.debug("Sending record_reviewed signal for record %s", resource.id)
+            create_or_update_reviews(event)
             record_reviewed.send(
                 sender=resource.__class__, record=resource, event=event, data=data
             )
-            create_or_update_reviews(event)
 
         if LOG_EVENTS:
             event.save()
