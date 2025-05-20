@@ -1,9 +1,14 @@
+from datetime import datetime
 from unittest import mock
 
 import pytest
 from dateutil.parser import parse as date_parse
 
-from amiqus.helpers import create_client, update_client_status
+from amiqus.helpers import (
+    create_client,
+    update_client_status,
+    update_record_expired_at_date,
+)
 from amiqus.models import Client
 
 
@@ -72,3 +77,16 @@ class TestUpdateClientStatus:
         )
         assert client.amiqus_id == str(client_data["id"])
         assert client.created_at == date_parse(client_data["created_at"])
+
+
+@pytest.mark.django_db
+class TestUpdateRecordExpiredAtDate:
+    @mock.patch("amiqus.helpers.patch")
+    def test_update_record_expired_at_date(self, mock_patch, record_data, record):
+        """Test the update_record_expired_at_date function."""
+        mock_patch.return_value = record_data
+        update_record_expired_at_date(record, datetime(2022, 6, 10))
+        mock_patch.assert_called_once_with(
+            f"records/{record.amiqus_id}",
+            data={"expired_at": "2022-06-10T00:00:00Z"},
+        )

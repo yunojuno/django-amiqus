@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Union, Literal
+from datetime import datetime
+from typing import Any, Literal, Union
 
 from django.conf import settings
 
-from .api import post, get, patch
-from .models import Client, Record, Review, Event
+from .api import get, patch, post
+from .models import Client, Event, Record, Review
 
 
 def create_client(user: settings.AUTH_USER_MODEL, **kwargs: Any) -> Client:
@@ -99,3 +100,17 @@ def update_client_status(client: Client, client_status: Client.ClientStatus) -> 
         f"clients/{client.amiqus_id}", data={"status": client_status.value}
     )
     client.parse(response).save()
+
+
+def update_record_expired_at_date(record: Record, expired_at: datetime) -> None:
+    """
+    Update the expired_at date of a record.
+
+    The expired_at date determines the date by which the client needs to complete
+    the required checks. Updating it with a future date will extend this deadline.
+    """
+    response = patch(
+        f"records/{record.amiqus_id}",
+        data={"expired_at": expired_at.strftime("%Y-%m-%dT%H:%M:%SZ")}
+    )
+    record.parse(response).save()
