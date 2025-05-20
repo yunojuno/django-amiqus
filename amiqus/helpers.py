@@ -111,6 +111,6 @@ def update_record_expired_at_date(record: Record, expired_at: datetime) -> None:
     """
     response = patch(
         f"records/{record.amiqus_id}",
-        data={"expired_at": expired_at.strftime("%Y-%m-%dT%H:%M:%SZ")}
+        data={"expired_at": expired_at.strftime("%Y-%m-%dT%H:%M:%SZ")},
     )
     record.parse(response).save()
