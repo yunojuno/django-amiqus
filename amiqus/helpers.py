@@ -108,6 +108,7 @@ def update_record_expired_at_date(record: Record, expired_at: datetime) -> None:
 
     The expired_at date determines the date by which the client needs to complete
     the required checks. Updating it with a future date will extend this deadline.
+    Value for expiry date must be within 10 days from now.
     """
     response = patch(
         f"records/{record.amiqus_id}",
