@@ -140,6 +140,7 @@ TEST_RECORD = {
     "created_at": "2022-05-22T08:22:12Z",
     "updated_at": "2022-05-22T08:22:12Z",
     "archived_at": None,
+    "expired_at": "2022-06-01T08:22:12Z",
 }
 # record returned by the v2 API
 # WRONG - THIS IS THE V1 RESPONSE
@@ -173,6 +174,7 @@ TEST_RECORD_V2 = {
     "created_at": "2023-04-06T15:09:25Z",
     "updated_at": "2023-04-06T15:17:50Z",
     "archived_at": None,
+    "expired_at": "2022-06-01T08:22:12Z",
 }
 
 TEST_CHECK_PHOTO_ID = {
