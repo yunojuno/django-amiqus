@@ -24,13 +24,14 @@ class RecordQuerySet(BaseQuerySet):
         logger.debug("Creating new Amiqus record from JSON: %s", raw)
 
         # Create the base record
+        perform_url = raw.get("perform_url") or ""
         record = Record.objects.create(
             user=client.user,
             client=client,
             amiqus_id=raw["id"],
             status=raw["status"],
             created_at=date_parse(raw["created_at"]),
-            perform_url=raw.get("perform_url"),
+            perform_url=perform_url,
             raw=raw,
         )
 
