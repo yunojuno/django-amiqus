@@ -81,6 +81,13 @@ class TestRecordManager:
         record = Record.objects.create_record(client=client, raw=data)
         assert record.checks.count() == 0
 
+    def test_create_record_with_no_perform_url(self, user, client):
+        """Test record creation works when perform_url is not returned from Amiqus."""
+        data = copy.deepcopy(TEST_RECORD)
+        data["perform_url"] = False
+        record = Record.objects.create_record(client=client, raw=data)
+        assert record.perform_url == ""
+
 
 @pytest.mark.django_db
 class TestRecordModel:
