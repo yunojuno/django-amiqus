@@ -3,7 +3,7 @@ Amiqus signals.
 
 Signals are fired when corresponding callbacks are received.
 
-See https://documentation.onfido.com/#webhooks
+See https://developers.amiqus.co/guides/webhooks.html
 
 """
 

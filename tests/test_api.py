@@ -36,7 +36,7 @@ class ApiTests(TestCase):
         mock_get.return_value = response
         self.assertEqual(get("/"), response.json.return_value)
         mock_get.assert_called_once_with(
-            _url("/", 1),
+            _url("/"),
             headers=headers,
             timeout=DEFAULT_REQUESTS_TIMEOUT,
         )
@@ -52,7 +52,7 @@ class ApiTests(TestCase):
         mock_post.return_value = response
         self.assertEqual(post("/", data=data), response.json.return_value)
         mock_post.assert_called_once_with(
-            _url("/", 1),
+            _url("/"),
             headers=headers,
             json=data,
             timeout=DEFAULT_REQUESTS_TIMEOUT,
@@ -69,7 +69,7 @@ class ApiTests(TestCase):
         mock_patch.return_value = response
         self.assertEqual(patch("/", data=data), response.json.return_value)
         mock_patch.assert_called_once_with(
-            _url("/", 2),  # Note: Using API version 2 as specified in the function
+            _url("/"),
             headers=headers,
             json=data,
             timeout=DEFAULT_REQUESTS_TIMEOUT,

@@ -10,7 +10,7 @@ def _setting(key, default):
 # API key from evnironment by default
 API_KEY = _setting("AMIQUS_ACCESS_TOKEN", None)
 
-# Webhook token - see https://documentation.onfido.com/#webhooks
+# Webhook token - see https://developers.amiqus.co/guides/webhooks.html
 WEBHOOK_SECURITY_TOKEN = _setting("AMIQUS_WEBHOOK_SECURITY_TOKEN", None)
 # token must be a bytestring for HMAC function to work
 WEBHOOK_SECURITY_TOKEN = (

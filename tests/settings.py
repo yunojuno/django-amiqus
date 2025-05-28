@@ -1,4 +1,4 @@
-from os import getenv, path
+from os import path
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -70,11 +70,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "propagate": True, "level": "DEBUG"},
-        # 'django': {
-        #     'handlers': ['console'],
-        #     'propagate': True,
-        #     'level': 'WARNING',
-        # },
         "amiqus": {
             "handlers": ["console"],
             "level": "DEBUG",
@@ -87,6 +82,3 @@ ROOT_URLCONF = "tests.urls"
 
 if not DEBUG:
     raise ImproperlyConfigured("This settings file can only be used with DEBUG=True")
-
-# False by default, but if True this will run the integration tests in test_integration
-TEST_INTEGRATION = bool(getenv("ONFIDO_TEST_INTEGRATION", False))

@@ -18,13 +18,7 @@ from .settings import API_KEY, DEFAULT_REQUESTS_TIMEOUT
 logger = logging.getLogger(__name__)
 
 # the API HTTP root url
-API_ROOT = "https://id.amiqus.co/api/"
-API_ROOT_V2 = "https://id.amiqus.co/api/v2/"
-
-API_ROOT_MAP = {
-    1: API_ROOT,
-    2: API_ROOT_V2,
-}
+API_ROOT = "https://id.amiqus.co/api/v2/"
 
 
 class ApiError(Exception):
@@ -39,10 +33,9 @@ class ApiError(Exception):
         self.error_type = data["error"]
 
 
-def _url(path: str, version: int) -> str:
+def _url(path: str) -> str:
     """Format absolute API URL."""
-    api_root = API_ROOT_MAP.get(version, API_ROOT_V2)
-    return urlparse.urljoin(api_root, path)
+    return urlparse.urljoin(API_ROOT, path)
 
 
 def _headers(api_key: str = API_KEY) -> dict[str, str]:
@@ -62,22 +55,20 @@ def _respond(response: HttpResponse) -> dict:
     return data
 
 
-def get(href: str, *, version: int = 2) -> dict:
+def get(href: str) -> dict:
     """Make a GET request and return the response as JSON."""
     logger.debug("Amiqus API GET request: %s", href)
     return _respond(
-        requests.get(
-            _url(href, version), headers=_headers(), timeout=DEFAULT_REQUESTS_TIMEOUT
-        )
+        requests.get(_url(href), headers=_headers(), timeout=DEFAULT_REQUESTS_TIMEOUT)
     )
 
 
-def post(href: str, *, data: dict, version: int = 2) -> dict:
+def post(href: str, *, data: dict) -> dict:
     """Make a POST request and return the response as JSON."""
     logger.debug("Amiqus API POST request: %s", href)
     return _respond(
         requests.post(
-            _url(href, version),
+            _url(href),
             headers=_headers(),
             json=data,
             timeout=DEFAULT_REQUESTS_TIMEOUT,
@@ -85,12 +76,12 @@ def post(href: str, *, data: dict, version: int = 2) -> dict:
     )
 
 
-def patch(href: str, *, data: dict, version: int = 2) -> dict:
+def patch(href: str, *, data: dict) -> dict:
     """Make a PATCH request and return the response as JSON."""
     logger.debug("Amiqus API PATCH request: %s", href)
     return _respond(
         requests.patch(
-            _url(href, version),
+            _url(href),
             headers=_headers(),
             json=data,
             timeout=DEFAULT_REQUESTS_TIMEOUT,
