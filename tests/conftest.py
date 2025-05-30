@@ -55,11 +55,11 @@ def record_finished_event():
     return copy.deepcopy(TEST_EVENT_RECORD_FINISHED)
 
 
-# https://amiqus.github.io/developers/api#tag/Clients
+# https://developers.amiqus.co/aqid/api-reference.html#tag/Clients
 TEST_CLIENT: dict = {
     "object": "client",
     "id": TEST_CLIENT_ID,
-    "status": None,
+    "status": "pending",
     "name": {
         "object": "name",
         "title": "mr",
