@@ -4,15 +4,18 @@ from django.conf import settings
 
 
 def _setting(key, default):
-    return getenv(key, default) or getattr(settings, key, default)
+    if hasattr(settings, key):
+        return getattr(settings, key)
+    else:
+        return getenv(key, default)
 
 
-# API key from evnironment by default
+# API key from environment by default
 API_KEY = _setting("AMIQUS_ACCESS_TOKEN", None)
 
 # Webhook token - see https://developers.amiqus.co/guides/webhooks.html
 WEBHOOK_SECURITY_TOKEN = _setting("AMIQUS_WEBHOOK_SECURITY_TOKEN", None)
-# token must be a bytestring for HMAC function to work
+# Token must be a bytestring for HMAC function to work
 WEBHOOK_SECURITY_TOKEN = (
     str.encode(WEBHOOK_SECURITY_TOKEN) if WEBHOOK_SECURITY_TOKEN else None
 )
