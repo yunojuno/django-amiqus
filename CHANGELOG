@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3
+
+- Deprecate usage of v1 `create_record` endpoint
+- Fix `Check` creation
+- Add `Step`, `Form`, and `Review` models
+- Fix webhook verification
+- Update parsing functions
+- Add a helper function to update `Client.status`
+- Add a helper function to update `Record.expired_at`
+- Remove references to Onfido/various cleanup
+- Fix `_setting` function
+
 ## v0.2
 
 - Add Django 5.0 to build matrix
