@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3
+
+- Deprecate usage of v1 `create_record` endpoint ([#7](https://github.com/yunojuno/django-amiqus/pull/7))
+- Fix `Check` creation ([#7](https://github.com/yunojuno/django-amiqus/pull/7))
+- Add `Step`, `Form`, and `Review` models ([#8](https://github.com/yunojuno/django-amiqus/pull/8))
+- Fix webhook verification ([#10](https://github.com/yunojuno/django-amiqus/pull/10))
+- Update parsing functions ([#12](https://github.com/yunojuno/django-amiqus/pull/12))
+- Add a helper function to update `Client.status` ([#13](https://github.com/yunojuno/django-amiqus/pull/13))
+- Add a helper function to update `Record.expired_at` ([#16](https://github.com/yunojuno/django-amiqus/pull/16))
+- Remove references to Onfido/various cleanup ([#18](https://github.com/yunojuno/django-amiqus/pull/18))
+- Fix `_setting` function ([#19](https://github.com/yunojuno/django-amiqus/pull/19))
+
 ## v0.2
 
 - Add Django 5.0 to build matrix
