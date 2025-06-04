@@ -1,5 +1,8 @@
 # django-amiqus
 
+> ⚠️ **NOTICE** ⚠️
+>
+> This package is scheduled to be moved to a private repository soon. Please do not rely on this public version for new projects.
 
 Django app for integration with the Amiqus API.
 
