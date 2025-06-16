@@ -61,15 +61,21 @@ jobs:
     strategy:
       matrix:
         python: ["3.10", "3.11", "3.12"]
-        # build LTS version, next version, HEAD
-        django: ["32", "42", "50", "main"]
+        django: ["32", "40", "41", "42", "50", "51", "52", "main"]
         exclude:
+          # Python 3.10 exclusions
           - python: "3.10"
             django: "main"
+          - python: "3.10"
+            django: "52"
+          - python: "3.10"
+            django: "51"
+          # Python 3.11 exclusions
           - python: "3.11"
             django: "main"
           - python: "3.11"
             django: "32"
+          # Python 3.12 exclusions
           - python: "3.12"
             django: "32"
 
