@@ -1,4 +1,5 @@
 """Tests for webhook functionality."""
+
 import json
 from unittest import mock
 from django.utils.timezone import now

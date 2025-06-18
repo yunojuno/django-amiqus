@@ -1,3 +1,6 @@
+line-length = 88
+
+[lint]
 ignore = [
     "D100",
     "D101",
@@ -14,7 +17,6 @@ ignore = [
     "D412",
     "D417",
 ]
-line-length = 88
 select = [
     "C9",
     "D",
@@ -24,10 +26,10 @@ select = [
     "W",
 ]
 
-[mccabe]
+[lint.mccabe]
 max-complexity = 8
 
-[per-file-ignores]
+[lint.per-file-ignores]
 "*tests/*" = [
     "D205",
     "D400",
