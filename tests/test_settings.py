@@ -2,7 +2,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from amiqus import api, settings
+from amiqus import settings
 
 
 class SettingsTests(TestCase):

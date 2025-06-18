@@ -21,8 +21,7 @@ class Step(models.Model):
         "Amiqus ID",
         max_length=40,
         help_text=_(
-            "The id returned from the Amiqus API. These should be unique on "
-            "the record."
+            "The id returned from the Amiqus API. These should be unique on the record."
         ),
         null=True,
     )
