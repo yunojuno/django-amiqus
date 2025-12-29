@@ -7,7 +7,7 @@
 
 Django app for integration with the Amiqus API.
 
-The current version supports Django 4.2+ and Python 3.10+.
+The current version supports Django 5.2-6.0 and Python 3.12+.
 
 ## Background
 
