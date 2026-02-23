@@ -1,9 +1,9 @@
 # django-amiqus
 
-> ⚠️ **NOTICE** ⚠️
->
-> This package is scheduled to be moved to a private repository soon. Please do not rely on this
-> public version for new projects.
+> [!WARNING]
+> **Deprecated:** This package is deprecated and will no longer receive support.
+> Please do not rely on this public version for new projects but the code will remain
+> for anyone who has existing reliance on it. 
 
 Django app for integration with the Amiqus API.
 
